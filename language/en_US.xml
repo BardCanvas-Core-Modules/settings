@@ -5,6 +5,7 @@
     <!-- Settings module language definitions -->
     <!-- #################################### -->
     
+    <display_name>Settings editor</display_name>
     <description>
         System settings editor.
     </description>
