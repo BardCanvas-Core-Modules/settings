@@ -16,12 +16,17 @@
         </menu_items>
         <record_nav>
             <page_title>Settings manager</page_title>
-            <save_group>Save group</save_group>
+            <save_now>Save now</save_now>
             <errors>
                 <empty_val>Setting "{$name}" cannot have an empty value. Please check it.</empty_val>
                 <var_ok>Setting "{$name}" saved.</var_ok>
             </errors>
         </record_nav>
+        <undefined_settings><![CDATA[
+            <b>Warning!</b>
+            The next settings were found in the database but no specs have been found on installed modules.<br>
+            Please be careful when editing them.
+        ]]></undefined_settings>
     </admin>
     
 </language>

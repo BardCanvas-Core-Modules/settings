@@ -14,108 +14,281 @@ $query = "
     order by name asc
 ";
 $res = $database->query($query);
+
+$all_vars = array();
 while($row = $database->fetch_object($res))
 {
     preg_match('/^(.*)\.(.*)$/', $row->name, $matches);
-    $var_groups[($matches[1])][($matches[2])]
-        = (object) array(
+    
+    $group_name = $matches[1];
+    $var_key    = $matches[2];
+    
+    $all_vars[$row->name] = $row->value;
+    $var_groups[$group_name][$var_key] = (object) array(
         "name"  => $row->name,
         "value" => $row->value,
     );
 }
-?>
 
-<!-- Settings styles -->
-<style type="text/css">
-    @media all and (min-width: 700px)
-    {
-        .settings_group {
-            -webkit-column-count: 2;
-            -moz-column-count:    2;
-            column-count:         2;
-        }
-        
-        .settings_group section {
-            display: inline-block; width: 100%;
-        }
-    }
-</style>
+$undefined_vars = array();
+?>
 
 <!-- Expandible Text Area -->
 <script type="text/javascript" src="<?=$config->full_root_path?>/lib/jquery.exptextarea.js"></script>
 <script type="text/javascript"> $(document).ready(function() { $('.expandible_textarea').expandingTextArea(); }); </script>
 
 <script type="text/javascript">
-    var active_tab = parseInt('<?= empty($_REQUEST["tab"]) ? "0" : $_REQUEST["tab"] ?>');
-    
     $(document).ready(function()
     {
-        $('#tabs').tabs({
-            active:   active_tab,
-            activate: function(event, ui) { active_tab = ui.newTab.index(); console.log(active_tab); }
+        function prepare_form_submission()
+        {
+            $.blockUI(blockUI_default_params);
+            stop_notifications_getter();
+        }
+        
+        function process_form_response(text)
+        {
+            if( text != 'OK' )
+            {
+                alert(text);
+                
+                $.unblockUI();
+                return;
+            }
+            
+            location.href = '<?= $_SERVER["PHP_SELF"] ?>?wasuuup=<?= md5(mt_rand(1, 65535)) ?>';
+        }
+        
+        $('#settings_form').ajaxForm({
+            target:       '#settings_saving_target',
+            beforeSubmit: prepare_form_submission,
+            success:      process_form_response
         });
     });
 </script>
 
-<h1 style="margin-top: 0;"><?= $current_module->language->admin->record_nav->page_title ?></h1>
+<h1 class="clearfix">
+    <button class="pull-right" onclick="location.href = '<?= $_SERVER["PHP_SELF"] ?>?wasuuup=<?= md5(mt_rand(1, 65535)) ?>'">
+        <span class="fa fa-refresh"></span>
+        <?= $language->reload ?>
+    </button>
+    <?= $current_module->language->admin->record_nav->page_title ?>
+</h1>
 
-<? if( count(array_merge($errors, $messages)) > 0 ): ?>
-    <div class="framed_content state_ok">
-        <? if( count($errors) > 0 ): ?>
-            <? foreach($errors as $item): ?>
-                <span class="fa fa-warning"></span>
-                <?= $item ?><br>
-            <? endforeach; ?>
-        <? endif; ?>
-        <? if( count($messages) > 0 ): ?>
-            <? foreach($messages as $item): ?>
-                <span class="fa fa-info-circle"></span>
-                <?= $item ?><br>
-            <? endforeach; ?>
-        <? endif; ?>
-    </div>
-<? endif; ?>
+<div id="settings_saving_target" style="display: none;"></div>
 
-<div id="tabs" class="framed_content">
-    <ul>
-        <? foreach($var_groups as $group_name => $group_data): ?>
-            <li><a href="#g<?= md5($group_name) ?>"><?= ucwords($group_name) ?></a></li>
-        <? endforeach; ?>
-    </ul>
+<form method="post" id="settings_form" action="<?= $_SERVER["PHP_SELF"] ?>?wasuuup=<?=md5(mt_rand(1,65535))?>">
     
-    <? foreach($var_groups as $group_name => $group_data): ?>
+    <? foreach($var_groups as $group_name => $group_data):
         
-        <div id="g<?= md5($group_name) ?>">
+        /** @var \SimpleXMLElement $group_language */
+        if( $group_name == "engine" ) $group_language = $language;
+        else                          $group_language = $modules[str_replace("modules:", "", $group_name)]->language;
+        
+        if( empty($group_language->settings_data) )
+        {
+            $undefined_vars[$group_name] = $group_data;
             
-            <form method="post" action="<?= $_SERVER["PHP_SELF"] ?>?wasuuup=<?=md5(mt_rand(1,65535))?>" onsubmit="$(this).find('input[name=tab]').val( active_tab )">
+            continue;
+        }
+        
+        $group_language = $group_language->settings_data;
+        ?>
+        
+        <div class="table_wrapper">
+            <table class="settings_group nav_table no_highlight">
                 
-                <input type="hidden" name="mode" value="save_group">
-                <input type="hidden" name="tab" value="<?= empty($_REQUEST["tab"]) ? "0" : $_REQUEST["tab"] ?>">
+                <thead>
+                <tr>
+                    <th colspan="2"><?= $group_language->title ?></th>
+                </tr>
+                </thead>
                 
-                <div class="settings_group">
-                    <? foreach($group_data as $key => $data): ?>
+                <tbody>
+                <? foreach($group_data as $key => $data):
+                    /** @var \SimpleXMLElement $specs */
+                    $specs = current($group_language->xpath("//specs[@key='$key']"));
+                    
+                    if( empty($specs) )
+                    {
+                        $undefined_vars[$group_name][$key] = $data;
                         
-                        <section class="setting_item">
-                            <h3><?= ucwords(str_replace("_", " ", $key)) ?></h3>
-                            <div class="framed_content">
-                                <textarea class="expandible_textarea" name="names[<?=$data->name?>]"><?= htmlspecialchars($data->value) ?></textarea>
+                        continue;
+                    }
+                    ?>
+                    <tr class="<? if($specs["is_locked"] == "true") echo "disabled" ?>">
+                        <td width="70%">
+                            <div class="principal_data">
+                                <? if($specs["is_locked"] == "true") echo "<span class='fa fa-lock'></span>" ?>
+                                <?= $specs->title ?>
                             </div>
-                        </section>
-                        
-                    <? endforeach; ?>
-                </div>
-                
-                <div align="center">
-                    <button type="submit" style="padding-top: 5px; padding-bottom: 5px;">
-                        <span class="fa fa-save"></span>
-                        <?= $current_module->language->admin->record_nav->save_group ?>
-                    </button>
-                </div>
-                
-            </form>
+                            <blockquote>
+                                <?= $specs->description ?>
+                            </blockquote>
+                            <!--<span class="framed_content inlined"><?= $data->name ?></span>-->
+                        </td>
+                        <td class="control" width="30%">
+                            <?
+                            if($specs["is_locked"] != "true")
+                                render_settings_editor($specs->type, $data->name, $data->value, $specs);
+                            else
+                                echo "<div class='framed_content disabled'>{$data->value}</div>";
+                            ?>
+                        </td>
+                    </tr>
+                <? endforeach; ?>
+                </tbody>
+            </table>
             
-        </div><!-- /#g<?= md5($group_name) ?> -->
-        
+            <p align="right" style="margin-top: 5px;">
+                <button type="submit">
+                    <span class="fa fa-save"></span>
+                    <?= $current_module->language->admin->record_nav->save_now ?>
+                </button>
+            </p>
+        </div>
+    
     <? endforeach; ?>
     
-</div><!-- /#tabs -->
+    <? if( ! empty($undefined_vars)): ?>
+        
+        <div class="framed_content state_ko">
+            <span class="fa fa-warning"></span>
+            <?= $current_module->language->admin->undefined_settings ?>
+        </div>
+        
+        <? foreach($undefined_vars as $group_name => $group_data): ?>
+            
+            <div class="table_wrapper">
+                <table class="settings_group nav_table no_highlight">
+                    
+                    <thead>
+                    <tr>
+                        <th colspan="2"><?= $group_name ?></th>
+                    </tr>
+                    </thead>
+                    
+                    <tbody>
+                    <? foreach($group_data as $key => $data): ?>
+                        <tr>
+                            <td width="70%">
+                                <div class="principal_data"><?= ucwords(str_replace("_", " ", $key)) ?></div>
+                                <span class="framed_content inlined"><?= $data->name ?></span>
+                            </td>
+                            <td width="30%">
+                            <textarea class="expandible_textarea"
+                                      name="names[<?=$data->name?>]"><?= htmlspecialchars($data->value) ?></textarea>
+                            </td>
+                        </tr>
+                    <? endforeach; ?>
+                    </tbody>
+                </table>
+                
+                <p align="right" style="margin-top: 5px;">
+                    <button type="submit">
+                        <span class="fa fa-save"></span>
+                        <?= $current_module->language->admin->record_nav->save_now ?>
+                    </button>
+                </p>
+            </div>
+            
+        <? endforeach; ?>
+        
+    <? endif; ?>
+    
+</form>
+
+<?
+function render_settings_editor($type, $name, $value, $specs = null)
+{
+    global $language;
+    
+    $type = trim($type);
+    
+    if( $type == "list" )
+    {
+        echo "<select name='names[{$name}]'>";
+        foreach($specs->options->option as $option)
+        {
+            $selected = trim($option["value"]) == $value ? "selected" : "";
+            echo "<option {$selected} value='{$option["value"]}'>{$option}</option>";
+        }
+        echo "</select>";
+        
+        return;
+    }
+    
+    if( $type == "boolean" )
+    {
+        $value     = $value == "true" ? "true" : "false";
+        $style_on  = $value == "true" ? "" : "display: none;";
+        $style_off = $value != "true" ? "" : "display: none;";
+        echo "
+            {$language->off}
+            <span class='fa-pseudo-switch' data-value-on='true' data-value-off='false' onclick='toggle_fa_pseudo_switch(this);'>
+                <input type='hidden' name='names[$name]' value='$value'>
+                <span class='toggler toggle-on  fa fa-toggle-on'  style='$style_on'></span>
+                <span class='toggler toggle-off fa fa-toggle-off' style='$style_off'></span>
+            </span>
+            {$language->on}
+        ";
+        
+        return;
+    }
+    
+    if( in_array($type, array("text", "email")) )
+    {
+        $value = htmlspecialchars($value);
+        echo "
+            <input type='$type' name='names[{$name}]' value='{$value}'>
+        ";
+        
+        return;
+    }
+    
+    if( $type == "template_selector" )
+    {
+        $installed_templates = glob(ABSPATH . "/templates/*", GLOB_ONLYDIR);
+        
+        echo "<select name='names[{$name}]'>";
+        foreach($installed_templates as $template_dir)
+        {
+            $template_name = basename($template_dir);
+            
+            $selected = $template_name == $value ? "selected" : "";
+            echo "<option {$selected} value='{$template_name}'>{$template_name}</option>";
+        }
+        echo "</select>";
+        
+        return;
+    }
+    
+    if( $type == "yes/no" )
+    {
+        $value   = $value == "true" ? "true" : "false";
+        $sel_on  = $value == "true" ? "checked" : "";
+        $sel_off = $value != "true" ? "checked" : "";
+        echo "
+            <label><input type='radio' $sel_on  name='names[{$name}]' value='true'>{$language->yes}</label>
+            <label><input type='radio' $sel_off name='names[{$name}]' value='false'>{$language->no}</label>
+        ";
+        
+        return;
+    }
+    
+    if( $type == "number" )
+    {
+        echo "
+            <input type='number' name='names[{$name}]' value='{$value}' style='text-align: right;'
+                   min='{$specs->options->min}' max='{$specs->options->max}'>
+        ";
+        
+        return;
+    }
+    
+    # Default: textarea
+    echo "
+        <textarea class='expandible_textarea' name='names[{$name}]'>" . htmlspecialchars($value) . "</textarea>
+    ";
+}
+?>
