@@ -4,8 +4,27 @@
  * @var array  $messages
  */
 
-# Grouping
 $var_groups = array();
+
+foreach($language->settings_data->specs as $spec)
+{
+    $var_groups["engine"][trim($spec["key"])] = (object) array(
+        "name"  => "engine." . trim($spec["key"]),
+        "value" => ""
+    );
+}
+
+foreach($modules as $module)
+{
+    if( empty($module->language->settings_data->specs) ) continue;
+    
+    foreach($module->language->settings_data->specs as $spec)
+        $var_groups["modules:{$module->name}"][trim($spec["key"])] = (object) array(
+            "name"  => "modules:{$module->name}." . trim($spec["key"]),
+            "value" => ""
+        );
+}
+
 $query = "
     select * from settings
     where name not like 'modules:%.installed'
@@ -14,8 +33,6 @@ $query = "
     order by name asc
 ";
 $res = $database->query($query);
-
-$all_vars = array();
 while($row = $database->fetch_object($res))
 {
     preg_match('/^(.*)\.(.*)$/', $row->name, $matches);
@@ -23,11 +40,13 @@ while($row = $database->fetch_object($res))
     $group_name = $matches[1];
     $var_key    = $matches[2];
     
-    $all_vars[$row->name] = $row->value;
-    $var_groups[$group_name][$var_key] = (object) array(
-        "name"  => $row->name,
-        "value" => $row->value,
-    );
+    if( isset($var_groups[$group_name][$var_key]) )
+        $var_groups[$group_name][$var_key]->value = $row->value;
+    else
+        $var_groups[$group_name][$var_key] = (object) array(
+            "name"  => $row->name,
+            "value" => $row->value,
+        );
 }
 
 $undefined_vars = array();
@@ -132,7 +151,9 @@ $undefined_vars = array();
                             if($specs["is_locked"] != "true")
                                 render_settings_editor($specs->type, $data->name, $data->value, $specs);
                             else
-                                echo "<div class='framed_content disabled'>{$data->value}</div>";
+                                echo "<div class='framed_content disabled'>" 
+                                    . ($data->value == "" ? "&mdash;" : $data->value) 
+                                    . "</div>";
                             ?>
                         </td>
                     </tr>
@@ -240,7 +261,7 @@ function render_settings_editor($type, $name, $value, $specs = null)
     {
         $value = htmlspecialchars($value);
         echo "
-            <input type='$type' name='names[{$name}]' value='{$value}'>
+            <input type='{$type}' name='names[{$name}]' value='{$value}'>
         ";
         
         return;
@@ -279,7 +300,7 @@ function render_settings_editor($type, $name, $value, $specs = null)
     if( $type == "number" )
     {
         echo "
-            <input type='number' name='names[{$name}]' value='{$value}' style='text-align: right;'
+            <input type='number' name='names[{$name}]' value='{$value}' style='text-align: center;'
                    min='{$specs->options->min}' max='{$specs->options->max}'>
         ";
         
