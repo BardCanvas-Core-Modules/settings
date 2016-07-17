@@ -27,11 +27,9 @@ if( ! empty($_POST["names"]) )
     }
     
     if( count($messages) > 0 )
-    {
         send_notification($account->id_account, "success", implode("\n", $messages));
-        
-        die("OK");
-    }
+    
+    die("OK");
 }
 
 $template->page_contents_include = "index.nav.inc";

@@ -134,8 +134,13 @@ $undefined_vars = array();
                         
                         continue;
                     }
+                    
+                    $class = "";
+                    if($specs["is_locked"] == "true") $class .= " disabled";
+                    if($specs["highlight_class"])     $class .= " {$specs["highlight_class"]}";
+                    
                     ?>
-                    <tr class="<? if($specs["is_locked"] == "true") echo "disabled" ?>">
+                    <tr class="<?= $class ?>">
                         <td width="70%">
                             <div class="principal_data">
                                 <? if($specs["is_locked"] == "true") echo "<span class='fa fa-lock'></span>" ?>
