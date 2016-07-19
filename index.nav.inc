@@ -145,6 +145,7 @@ $undefined_vars = array();
                             <div class="principal_data">
                                 <? if($specs["is_locked"] == "true") echo "<span class='fa fa-lock'></span>" ?>
                                 <?= $specs->title ?>
+                                <span class="framed_content inlined fixed_font" style="font-weight: normal;"><?= $data->name ?></span>
                             </div>
                             <blockquote>
                                 <?= $specs->description ?>
@@ -199,7 +200,7 @@ $undefined_vars = array();
                         <tr>
                             <td width="70%">
                                 <div class="principal_data"><?= ucwords(str_replace("_", " ", $key)) ?></div>
-                                <span class="framed_content inlined"><?= $data->name ?></span>
+                                <span class="framed_content inlined fixed_font" style="font-weight: normal;"><?= $data->name ?></span>
                             </td>
                             <td width="30%">
                             <textarea class="expandible_textarea"
