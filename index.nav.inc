@@ -1,8 +1,12 @@
 <?php
 /**
- * @var array  $errors
- * @var array  $messages
+ * @var array             $errors
+ * @var array             $messages
+ * @var config            $config
+ * @var \SimpleXMLElement $language
  */
+
+use hng2_base\config;
 
 $var_groups = array();
 
@@ -56,9 +60,31 @@ $undefined_vars = array();
 <script type="text/javascript" src="<?=$config->full_root_path?>/lib/jquery.exptextarea.js"></script>
 <script type="text/javascript"> $(document).ready(function() { $('.expandible_textarea').expandingTextArea(); }); </script>
 
+<!-- CodeMirror -->
+<script                 src="<?=$config->full_root_path?>/lib/CodeMirror-5.16.2/lib/codemirror.js"></script>
+<link rel="stylesheet" href="<?=$config->full_root_path?>/lib/CodeMirror-5.16.2/lib/codemirror.css">
+<style type="text/css">
+    .CodeMirror {
+        border: 1px solid silver;
+        height: auto;
+        font-family: 'Lucida Console', 'Courier new', Courier, monospace !important; font-size: 8pt;
+        /*max-width: 99%;*/
+    }
+</style>
+
 <script type="text/javascript">
     $(document).ready(function()
     {
+        $('textarea.CodeMirror').each(function()
+        {
+            var element = $(this).get(0);
+            
+            CodeMirror.fromTextArea(element, {
+                viewPortMargin: Infinity,
+                lineNumbers:    true
+            }); 
+        });
+        
         function prepare_form_submission()
         {
             $.blockUI(blockUI_default_params);
@@ -203,8 +229,7 @@ $undefined_vars = array();
                                 <span class="framed_content inlined fixed_font" style="font-weight: normal;"><?= $data->name ?></span>
                             </td>
                             <td width="30%">
-                            <textarea class="expandible_textarea"
-                                      name="names[<?=$data->name?>]"><?= htmlspecialchars($data->value) ?></textarea>
+                                <? render_settings_editor("textarea", $data->name, $data->value, null) ?>
                             </td>
                         </tr>
                     <? endforeach; ?>
@@ -226,10 +251,12 @@ $undefined_vars = array();
 </form>
 
 <?
+$generation_index = 0;
 function render_settings_editor($type, $name, $value, $specs = null)
 {
-    global $language;
+    global $language, $generation_index;
     
+    $generation_index++;
     $type = trim($type);
     
     if( $type == "list" )
@@ -266,9 +293,7 @@ function render_settings_editor($type, $name, $value, $specs = null)
     if( in_array($type, array("text", "email")) )
     {
         $value = htmlspecialchars($value);
-        echo "
-            <input type='{$type}' name='names[{$name}]' value='{$value}'>
-        ";
+        echo "<input " . " type='{$type}' name='names[{$name}]' value='{$value}'>";
         
         return;
     }
@@ -308,6 +333,15 @@ function render_settings_editor($type, $name, $value, $specs = null)
         echo "
             <input type='number' name='names[{$name}]' value='{$value}' style='text-align: center;'
                    min='{$specs->options->min}' max='{$specs->options->max}'>
+        ";
+        
+        return;
+    }
+    
+    if( $type == "code" )
+    {
+        echo "
+            <textarea class='CodeMirror' id='ta_$generation_index' name='names[{$name}]'>" . htmlspecialchars($value) . "</textarea>
         ";
         
         return;
