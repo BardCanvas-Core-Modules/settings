@@ -161,10 +161,11 @@ $undefined_vars = array();
                         continue;
                     }
                     
+                    if($specs["disabled"] == "true") continue;
+                    
                     $class = "";
                     if($specs["is_locked"] == "true") $class .= " disabled";
                     if($specs["highlight_class"])     $class .= " {$specs["highlight_class"]}";
-                    
                     ?>
                     <tr class="<?= $class ?>">
                         <td width="70%">
