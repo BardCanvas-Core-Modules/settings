@@ -33,7 +33,6 @@ $query = "
     select * from settings
     where name not like 'modules:%.installed'
     and   name not like 'modules:%.enabled'
-    and   name not like 'engine.admins'
     order by name asc
 ";
 $res = $database->query($query);
