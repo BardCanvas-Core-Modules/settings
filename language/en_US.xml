@@ -28,6 +28,17 @@
             The next settings were found in the database but no specs have been found on installed modules.<br>
             Please be careful when editing them.
         ]]></undefined_settings>
+        <wrong_type><![CDATA[
+            This setting has an incorrect type syntax (it starts with an <code>@</code>, but
+            no module/extension point is specified. The type must be checked on the module's language file.
+        ]]></wrong_type>
+        <missing_extender><![CDATA[
+            This setting has an extender requirement, but the module wasn't found.<br>
+            Requested module: <span class="framed_content inlined">{$module}</span><br>
+            Hook area: <span class="framed_content inlined">{$area}</span><br>
+            Hook marker: <span class="framed_content inlined">{$marker}</span><br>
+            You may need to install/enable that module to natively edit this value.
+        ]]></missing_extender>
     </admin>
     
 </language>

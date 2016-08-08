@@ -55,6 +55,9 @@ while($row = $database->fetch_object($res))
 $undefined_vars = array();
 ?>
 
+<!-- Extender inits -->
+<? $current_module->load_extensions("specs_renderer", "preinits"); ?>
+
 <!-- Expandible Text Area -->
 <script type="text/javascript" src="<?=$config->full_root_path?>/lib/jquery.exptextarea.js"></script>
 <script type="text/javascript"> $(document).ready(function() { $('.expandible_textarea').expandingTextArea(); }); </script>
@@ -254,7 +257,7 @@ $undefined_vars = array();
 $generation_index = 0;
 function render_settings_editor($type, $name, $value, $specs = null)
 {
-    global $language, $generation_index;
+    global $language, $generation_index, $current_module, $config;
     
     $generation_index++;
     $type = trim($type);
@@ -345,6 +348,54 @@ function render_settings_editor($type, $name, $value, $specs = null)
         ";
         
         return;
+    }
+    
+    if( substr($type, 0, 1) == "@" )
+    {
+        # Extender!
+        preg_match('#^@(.*):(.*)/(.*)$#i', $type, $matches);
+        if( empty($matches) )
+        {
+            echo "
+                <div class='framed_content state_ko'>
+                    <span class='fa fa-warning'></span>
+                    {$current_module->language->admin->wrong_type}
+                </div>
+                <textarea class='expandible_textarea' name='names[{$name}]'>" . htmlspecialchars($value) . "</textarea>
+            ";
+            
+            return;
+        }
+        else
+        {
+            $module_name = $matches[1];
+            $hook_area   = $matches[2];
+            $hook_marker = $matches[3];
+            
+            if( ! isset($current_module->extended_by[$module_name][$hook_area]->{$hook_marker}) )
+            {
+                $message = replace_escaped_vars(
+                    $current_module->language->admin->missing_extender,
+                    array('{$module}', '{$area}', '{$marker}'),
+                    array($module_name, $hook_area, $hook_marker)
+                );
+                
+                echo "
+                    <div class='framed_content state_ko'>
+                        <span class='fa fa-warning'></span>
+                        {$message}
+                    </div>
+                    <textarea class='expandible_textarea' name='names[{$name}]'>" . htmlspecialchars($value) . "</textarea>
+                ";
+                
+                return;
+            }
+            
+            $config->globals["$hook_area/$hook_marker"] = array("name" => $name, "value" => $value);
+            $current_module->load_extensions($hook_area, $hook_marker);
+            
+            return;
+        }
     }
     
     # Default: textarea
