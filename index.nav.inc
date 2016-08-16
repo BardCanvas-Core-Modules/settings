@@ -12,10 +12,16 @@ $var_groups = array();
 
 foreach($language->settings_data->specs as $spec)
 {
-    $var_groups["engine"][trim($spec["key"])] = (object) array(
-        "name"  => "engine." . trim($spec["key"]),
-        "value" => ""
-    );
+    if( $spec["is_separator"] )
+        $var_groups["engine"][trim($spec)] = (object) array(
+            "name"  => "engine." . trim($spec),
+            "value" => "___SEPARATOR___"
+        );
+    else
+        $var_groups["engine"][trim($spec["key"])] = (object) array(
+            "name"  => "engine." . trim($spec["key"]),
+            "value" => ""
+        );
 }
 
 foreach($modules as $module)
@@ -72,6 +78,7 @@ $undefined_vars = array();
         font-family: 'Lucida Console', 'Courier new', Courier, monospace !important; font-size: 8pt;
         /*max-width: 99%;*/
     }
+    td.indented { padding-left: 18px; }
 </style>
 
 <script type="text/javascript">
@@ -140,6 +147,7 @@ $undefined_vars = array();
         }
         
         $group_language = $group_language->settings_data;
+        $details_class = "";
         ?>
         
         <div class="table_wrapper">
@@ -153,9 +161,24 @@ $undefined_vars = array();
                 
                 <tbody>
                 <? foreach($group_data as $key => $data):
+                    
+                    if( $data->value == "___SEPARATOR___" )
+                    {
+                        $details_class = "indented";
+                        echo "
+                        <tr class='clicked'>
+                            <td colspan=\"2\">
+                                <span class='fa fa-caret-down'></span>
+                                <b>{$key}</b>
+                            </td>
+                        </tr>
+                        ";
+                        
+                        continue;
+                    }
+                    
                     /** @var \SimpleXMLElement $specs */
                     $specs = current($group_language->xpath("//specs[@key='$key']"));
-                    
                     if( empty($specs) )
                     {
                         $undefined_vars[$group_name][$key] = $data;
@@ -170,7 +193,7 @@ $undefined_vars = array();
                     if($specs["highlight_class"])     $class .= " {$specs["highlight_class"]}";
                     ?>
                     <tr class="<?= $class ?>">
-                        <td width="70%">
+                        <td width="70%" class="<?= $details_class ?>">
                             <div class="principal_data">
                                 <? if($specs["is_locked"] == "true") echo "<span class='fa fa-lock'></span>" ?>
                                 <?= $specs->title ?>
