@@ -4,9 +4,11 @@
  * @var array             $messages
  * @var config            $config
  * @var \SimpleXMLElement $language
+ * @var module            $current_module
  */
 
 use hng2_base\config;
+use hng2_base\module;
 
 $var_groups = array();
 
