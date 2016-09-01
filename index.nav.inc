@@ -136,15 +136,34 @@ $undefined_vars = array();
         if( value == '' )
         {
             $('.settings_group tr:hidden').show();
-        
+            $('.group_container:hidden').show();
+            
             return;
         }
         
-        $('.settings_group tr.searchable').each(function()
+        $('.group_container').each(function()
         {
-            var contents = $(this).text().toLowerCase();
-            if( contents.indexOf(value) >= 0 ) $(this).show();
-            else                               $(this).hide();
+            var $group = $(this);
+            var hidden_trs  = 0;
+            var visible_trs = 0;
+            $group.find('.settings_group tr.searchable').each(function()
+            {
+                var $tr      = $(this);
+                var contents = $tr.text().toLowerCase();
+                if( contents.indexOf(value) >= 0 )
+                {
+                    $tr.show();
+                    visible_trs++;
+                }
+                else
+                {
+                    $tr.hide();
+                    hidden_trs++;
+                }
+            });
+            
+            if( visible_trs == 0 ) $group.hide();
+            else                   $group.show();
         });
     }
     
@@ -209,8 +228,8 @@ $undefined_vars = array();
         $details_class = "";
         ?>
         
-        <a name="<?= sanitize_file_name($group_name) ?>"></a>
-        <div class="table_wrapper">
+        <div class="table_wrapper group_container">
+            <a name="<?= sanitize_file_name($group_name) ?>"></a>
             <table class="settings_group nav_table no_highlight">
                 
                 <thead>
@@ -302,7 +321,7 @@ $undefined_vars = array();
         
         <? foreach($undefined_vars as $group_name => $group_data): ?>
             
-            <div class="table_wrapper">
+            <div class="table_wrapper group_container">
                 <table class="settings_group nav_table no_highlight">
                     
                     <thead>
