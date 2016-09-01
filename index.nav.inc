@@ -81,6 +81,12 @@ $undefined_vars = array();
         /*max-width: 99%;*/
     }
     td.indented { padding-left: 18px; }
+
+    .toplinks   { margin-bottom: 10px; }
+    .toplinks a { margin: 0 5px 5px 0; font-family: "Arial Narrow", Arial, Arial, Helvetica, sans-serif; }
+    
+    #settings_filter input[type="text"] { padding-right: 24px; }
+    #settings_filter .cleanup           { position: absolute; margin-left: -24px; margin-top: 2px; cursor: pointer; color: ButtonText; }
 </style>
 
 <script type="text/javascript">
@@ -121,21 +127,72 @@ $undefined_vars = array();
             success:      process_form_response
         });
     });
+    
+    function filter_settings()
+    {
+        var $input = $('#settings_filter').find('input[type="text"]');
+        var value  = $input.val().trim().toLowerCase();
+        
+        if( value == '' )
+        {
+            $('.settings_group tr:hidden').show();
+        
+            return;
+        }
+        
+        $('.settings_group tr.searchable').each(function()
+        {
+            var contents = $(this).text().toLowerCase();
+            if( contents.indexOf(value) >= 0 ) $(this).show();
+            else                               $(this).hide();
+        });
+    }
+    
+    function clear_settings_filter()
+    {
+        $('#settings_filter').find('input[type="text"]').val('');
+        filter_settings();
+    }
 </script>
 
+<a name="top"></a>
 <h1 class="clearfix">
     <button class="pull-right" onclick="location.href = '<?= $_SERVER["PHP_SELF"] ?>?wasuuup=<?= md5(mt_rand(1, 65535)) ?>'">
         <span class="fa fa-refresh"></span>
         <?= $language->reload ?>
     </button>
+    
     <?= $current_module->language->admin->record_nav->page_title ?>
+    
+    <span id="settings_filter">
+        <input type="text" placeholder="<?= $current_module->language->lookup_caption ?>"
+               onkeyup="filter_settings()" onchange="filter_settings()">
+        <span class="cleanup fa fa-times fa-fw" onclick="clear_settings_filter()"></span>
+    </span>
 </h1>
 
 <div id="settings_saving_target" style="display: none;"></div>
 
 <form method="post" id="settings_form" action="<?= $_SERVER["PHP_SELF"] ?>?wasuuup=<?=md5(mt_rand(1,65535))?>">
     
-    <? foreach($var_groups as $group_name => $group_data):
+    <div class="toplinks">
+        <?
+        foreach($var_groups as $group_name => $group_data):
+            /** @var \SimpleXMLElement $group_language */
+            if( $group_name == "engine" ) $group_language = $language;
+            else                          $group_language = $modules[str_replace("modules:", "", $group_name)]->language;
+            
+            if( empty($group_language->settings_data) ) continue;
+            
+            $group_language = $group_language->settings_data;
+            $group_title    = $group_language->title;
+            ?>
+            <a class="framed_content" href="#<?= sanitize_file_name($group_name) ?>"><?= $group_title ?></a>
+        <? endforeach; ?>
+    </div>
+    
+    <?
+    foreach($var_groups as $group_name => $group_data):
         
         /** @var \SimpleXMLElement $group_language */
         if( $group_name == "engine" ) $group_language = $language;
@@ -152,6 +209,7 @@ $undefined_vars = array();
         $details_class = "";
         ?>
         
+        <a name="<?= sanitize_file_name($group_name) ?>"></a>
         <div class="table_wrapper">
             <table class="settings_group nav_table no_highlight">
                 
@@ -194,7 +252,7 @@ $undefined_vars = array();
                     if($specs["is_locked"] == "true") $class .= " disabled";
                     if($specs["highlight_class"])     $class .= " {$specs["highlight_class"]}";
                     ?>
-                    <tr class="<?= $class ?>">
+                    <tr class="searchable <?= $class ?>">
                         <td width="70%" class="<?= $details_class ?>">
                             <div class="principal_data">
                                 <? if($specs["is_locked"] == "true") echo "<span class='fa fa-lock'></span>" ?>
@@ -221,14 +279,18 @@ $undefined_vars = array();
                 </tbody>
             </table>
             
-            <p align="right" style="margin-top: 5px;">
-                <button type="submit">
+            <p class="clearfix" style="margin-top: 5px;">
+                <a href="#top">
+                   <span class="fa fa-arrow-up"></span>
+                    <?= $current_module->language->back_to_top ?>
+                </a>
+                <button type="submit" class="pull-right">
                     <span class="fa fa-save"></span>
                     <?= $current_module->language->admin->record_nav->save_now ?>
                 </button>
             </p>
         </div>
-    
+        
     <? endforeach; ?>
     
     <? if( ! empty($undefined_vars)): ?>
@@ -251,7 +313,7 @@ $undefined_vars = array();
                     
                     <tbody>
                     <? foreach($group_data as $key => $data): ?>
-                        <tr>
+                        <tr class="searchable">
                             <td width="70%">
                                 <div class="principal_data"><?= ucwords(str_replace("_", " ", $key)) ?></div>
                                 <span class="framed_content inlined fixed_font" style="font-weight: normal;"><?= $data->name ?></span>
@@ -264,8 +326,12 @@ $undefined_vars = array();
                     </tbody>
                 </table>
                 
-                <p align="right" style="margin-top: 5px;">
-                    <button type="submit">
+                <p class="clearfix" style="margin-top: 5px;">
+                    <a href="#top">
+                        <span class="fa fa-arrow-up"></span>
+                        <?= $current_module->language->back_to_top ?>
+                    </a>
+                    <button type="submit" class="pull-right">
                         <span class="fa fa-save"></span>
                         <?= $current_module->language->admin->record_nav->save_now ?>
                     </button>

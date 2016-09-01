@@ -10,6 +10,9 @@
     <description>
         System settings editor.
     </description>
+
+    <back_to_top>Back to top</back_to_top>
+    <lookup_caption>Lookup on settings</lookup_caption>
     
     <admin>
         <menu_items>
