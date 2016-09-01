@@ -87,9 +87,15 @@ $undefined_vars = array();
     
     #settings_filter input[type="text"] { padding-right: 24px; }
     #settings_filter .cleanup           { position: absolute; margin-left: -24px; margin-top: 2px; cursor: pointer; color: ButtonText; }
+    
+    .highlight { background-color: yellow }
 </style>
 
+<!-- Hilitor -->
+<script type="text/javascript" src="<?= $config->full_root_path ?>/lib/jquery.highlight-5.js"></script>
+
 <script type="text/javascript">
+    
     $(document).ready(function()
     {
         $('textarea.CodeMirror').each(function()
@@ -130,9 +136,11 @@ $undefined_vars = array();
     
     function filter_settings()
     {
+        var $form  = $('#settings_form');
         var $input = $('#settings_filter').find('input[type="text"]');
         var value  = $input.val().trim().toLowerCase();
-        
+    
+        $form.removeHighlight();
         if( value == '' )
         {
             $('.settings_group tr:hidden').show();
@@ -165,6 +173,8 @@ $undefined_vars = array();
             if( visible_trs == 0 ) $group.hide();
             else                   $group.show();
         });
+        
+        $('.searchable_target').highlight(value);
     }
     
     function clear_settings_filter()
@@ -234,7 +244,7 @@ $undefined_vars = array();
                 
                 <thead>
                 <tr>
-                    <th colspan="2"><?= $group_language->title ?></th>
+                    <th colspan="2" class="searchable_target"><?= $group_language->title ?></th>
                 </tr>
                 </thead>
                 
@@ -272,7 +282,7 @@ $undefined_vars = array();
                     if($specs["highlight_class"])     $class .= " {$specs["highlight_class"]}";
                     ?>
                     <tr class="searchable <?= $class ?>">
-                        <td width="70%" class="<?= $details_class ?>">
+                        <td width="70%" class="searchable_target <?= $details_class ?>">
                             <div class="principal_data">
                                 <? if($specs["is_locked"] == "true") echo "<span class='fa fa-lock'></span>" ?>
                                 <?= $specs->title ?>
@@ -326,14 +336,14 @@ $undefined_vars = array();
                     
                     <thead>
                     <tr>
-                        <th colspan="2"><?= $group_name ?></th>
+                        <th colspan="2" class="searchable_target"><?= $group_name ?></th>
                     </tr>
                     </thead>
                     
                     <tbody>
                     <? foreach($group_data as $key => $data): ?>
                         <tr class="searchable">
-                            <td width="70%">
+                            <td width="70%" class="searchable_target">
                                 <div class="principal_data"><?= ucwords(str_replace("_", " ", $key)) ?></div>
                                 <span class="framed_content inlined fixed_font" style="font-weight: normal;"><?= $data->name ?></span>
                             </td>
