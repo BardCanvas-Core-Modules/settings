@@ -20,6 +20,8 @@
         </menu_items>
         <record_nav>
             <page_title>Settings manager</page_title>
+            <show_all>Show all</show_all>
+            <orphan>Orphan/undefined</orphan>
             <save_now>Save now</save_now>
             <errors>
                 <empty_val>Setting "{$name}" cannot have an empty value. Please check it.</empty_val>

@@ -82,8 +82,8 @@ $undefined_vars = array();
     }
     td.indented { padding-left: 18px; }
 
-    .toplinks   { margin-bottom: 10px; }
-    .toplinks a { margin: 0 5px 5px 0; font-family: "Arial Narrow", Arial, Arial, Helvetica, sans-serif; }
+    .toplinks          { margin-bottom: 10px; }
+    .toplinks .toplink { margin: 0 5px 5px 0; font-family: "Arial Narrow", Arial, Arial, Helvetica, sans-serif; }
     
     #settings_filter input[type="text"] { padding-right: 24px; }
     #settings_filter .cleanup           { position: absolute; margin-left: -24px; margin-top: 2px; cursor: pointer; color: ButtonText; }
@@ -136,19 +136,23 @@ $undefined_vars = array();
     
     function filter_settings()
     {
-        var $form  = $('#settings_form');
-        var $input = $('#settings_filter').find('input[type="text"]');
-        var value  = $input.val().trim().toLowerCase();
-    
+        var $form     = $('#settings_form');
+        var $toplinks = $form.find('.toplinks');
+        var $input    = $('#settings_filter').find('input[type="text"]');
+        var value     = $input.val().trim().toLowerCase();
+        
         $form.removeHighlight();
         if( value == '' )
         {
             $('.settings_group tr:hidden').show();
             $('.group_container:hidden').show();
+            $toplinks.find('.toplink').toggleClass('state_active', false);
+            $toplinks.show();
             
             return;
         }
         
+        $toplinks.hide();
         $('.group_container').each(function()
         {
             var $group = $(this);
@@ -182,6 +186,27 @@ $undefined_vars = array();
         $('#settings_filter').find('input[type="text"]').val('');
         filter_settings();
     }
+    
+    function show_settings_group(trigger)
+    {
+        var $form     = $('#settings_form');
+        var $toplinks = $form.find('.toplinks');
+        var $trigger  = $(trigger);
+        var group_name = $trigger.attr('data-group-name');
+        
+        if( group_name == '*' )
+        {
+            $toplinks.find('.toplink').toggleClass('state_active', false);
+            $form.find('.group_container').show();
+            
+            return;
+        }
+        
+        $toplinks.find('.toplink').toggleClass('state_active', false);
+        $trigger.toggleClass('state_active', true);
+        $form.find('.group_container:not([data-group-name="' +  group_name + '"])').hide();
+        $form.find('.group_container[data-group-name="' +  group_name + '"]').show();
+    }
 </script>
 
 <a name="top"></a>
@@ -205,6 +230,10 @@ $undefined_vars = array();
 <form method="post" id="settings_form" action="<?= $_SERVER["PHP_SELF"] ?>?wasuuup=<?=md5(mt_rand(1,65535))?>">
     
     <div class="toplinks">
+        <span class="toplink framed_content pseudo_link" data-group-name="*"
+              onmouseover="$(this).toggleClass('state_hover', true)" onmouseout="$(this).toggleClass('state_hover', false)"
+              onclick="show_settings_group(this)"><?= $current_module->language->admin->record_nav->show_all ?></span>
+        
         <?
         foreach($var_groups as $group_name => $group_data):
             /** @var \SimpleXMLElement $group_language */
@@ -216,7 +245,9 @@ $undefined_vars = array();
             $group_language = $group_language->settings_data;
             $group_title    = $group_language->title;
             ?>
-            <a class="framed_content" href="#<?= sanitize_file_name($group_name) ?>"><?= $group_title ?></a>
+            <span class="toplink framed_content pseudo_link" data-group-name="<?= sanitize_file_name($group_name) ?>"
+                  onmouseover="$(this).toggleClass('state_hover', true)" onmouseout="$(this).toggleClass('state_hover', false)"
+                  onclick="show_settings_group(this)"><?= $group_title ?></span>
         <? endforeach; ?>
     </div>
     
@@ -238,8 +269,8 @@ $undefined_vars = array();
         $details_class = "";
         ?>
         
-        <div class="table_wrapper group_container">
-            <a name="<?= sanitize_file_name($group_name) ?>"></a>
+        <div class="table_wrapper group_container" data-group-name="<?= sanitize_file_name($group_name) ?>">
+            
             <table class="settings_group nav_table no_highlight">
                 
                 <thead>
@@ -324,19 +355,26 @@ $undefined_vars = array();
     
     <? if( ! empty($undefined_vars)): ?>
         
-        <div class="framed_content state_ko">
-            <span class="fa fa-warning"></span>
-            <?= $current_module->language->admin->undefined_settings ?>
-        </div>
-        
+        <? $warning_echoed = false; ?>
         <? foreach($undefined_vars as $group_name => $group_data): ?>
             
-            <div class="table_wrapper group_container">
+            <div class="table_wrapper group_container" data-group-name="@!orphan">
+                
+                <? if( ! $warning_echoed ): ?>
+                    <div class="framed_content state_ko" style="margin-top: 0;">
+                        <span class="fa fa-warning"></span>
+                        <?= $current_module->language->admin->undefined_settings ?>
+                    </div>
+                    <? $warning_echoed = true; ?>
+                <? endif; ?>
+                
                 <table class="settings_group nav_table no_highlight">
                     
                     <thead>
                     <tr>
-                        <th colspan="2" class="searchable_target"><?= $group_name ?></th>
+                        <th colspan="2" class="searchable_target">
+                            <?= $group_name ?>
+                        </th>
                     </tr>
                     </thead>
                     
@@ -368,6 +406,16 @@ $undefined_vars = array();
             </div>
             
         <? endforeach; ?>
+        
+        <script type="text/javascript">
+            var html = "<span class=\"toplink framed_content pseudo_link\" data-group-name=\"@!orphan\" "
+                + "onmouseover=\"$(this).toggleClass('state_hover', true)\" "
+                + "onmouseout=\"$(this).toggleClass('state_hover', false)\" "
+                + "onclick=\"show_settings_group(this)\">"
+                + "<?= $current_module->language->admin->record_nav->orphan ?>"
+                + "</span>";
+            $('#settings_form').find('.toplinks').append(html);
+        </script>
         
     <? endif; ?>
     
