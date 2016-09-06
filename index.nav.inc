@@ -518,6 +518,11 @@ function render_settings_editor($type, $name, $value, $specs = null)
         return;
     }
     
+    /**
+     * Here, the type is defined in the language file as follows:
+     * <type>@gallery:specs_renderer/image_selector</type>
+     * So take a look at the gallery extender above to see how to deal with this kind of control.
+     */
     if( substr($type, 0, 1) == "@" )
     {
         # Extender!
