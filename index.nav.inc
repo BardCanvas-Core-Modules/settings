@@ -490,6 +490,33 @@ function render_settings_editor($type, $name, $value, $specs = null)
         return;
     }
     
+    if( $type == "locale_list" )
+    {
+        $options           = array();
+        $installed_locales = glob(ABSPATH . "/language/*.xml");
+        foreach($installed_locales as $locale_file)
+        {
+            $xml     = simplexml_load_file($locale_file);
+            $iso     = trim($xml->info->locale);
+            $caption = trim($xml->info->full_name);
+            $options[$iso] = $caption;
+        }
+        asort($options);
+        $english = $options["en_US"];
+        unset($options["en_US"]);
+        $options = array_merge(array("en_US" => $english), $options);
+        
+        echo "<select name='names[{$name}]'>";
+        foreach($options as $iso => $caption)
+        {
+            $selected = $iso == $value ? "selected" : "";
+            echo "<option {$selected} value='{$iso}'>{$caption}</option>";
+        }
+        echo "</select>";
+        
+        return;
+    }
+    
     if( $type == "yes/no" )
     {
         $value   = $value == "true" ? "true" : "false";
