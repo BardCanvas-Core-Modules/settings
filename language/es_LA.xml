@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<language>
+    
+    <display_name>Editor de configuración</display_name>
+    <icon>fa-gears</icon>
+    <description>
+        Editor de configuración del sistema.
+    </description>
+
+    <back_to_top>Regresar al inicio</back_to_top>
+    <lookup_caption>Buscar entre descripciones</lookup_caption>
+    
+    <admin>
+        <menu_items>
+            <admin_menu_caption>Configuración</admin_menu_caption>
+        </menu_items>
+        <record_nav>
+            <page_title>Editor de configuración</page_title>
+            <show_all>Todo</show_all>
+            <orphan>Otros/sin definir</orphan>
+            <save_now>Guardar ahora</save_now>
+            <errors>
+                <empty_val>El elemento "{$name}" no puede tener un valor vacío. Favor de verificar.</empty_val>
+                <var_ok>Elemento "{$name}" guardado.</var_ok>
+            </errors>
+        </record_nav>
+        <undefined_settings><![CDATA[
+            <b>Advertencia!</b>
+            Las siguientes opciones se encontraron en la base de datos pero no se han encontrado especificaciones
+            en ningun módulo instalado.<br>
+            Evita tocarlas o ten cuidado al hacerlo.
+        ]]></undefined_settings>
+        <wrong_type><![CDATA[
+            Este elemento tiene un tipo incorrecto definido (comienza con <code>@</code>, pero
+            no hay ningún módulo/punto de extensión especificado.
+            El tipo debe ser checado en el archivo de lenguaje del módulo.
+        ]]></wrong_type>
+        <missing_extender><![CDATA[
+            Este elemento tiene un requerimiento de extensión, pero no se ha encontrado el módulo.<br>
+            Módulo requerido: <span class="framed_content inlined">{$module}</span><br>
+            Área de anclaje: <span class="framed_content inlined">{$area}</span><br>
+            Marcador de anclaje: <span class="framed_content inlined">{$marker}</span><br>
+            Es posible que necesites instalar/habilitar el módulo referenciado para editar el valor de forma adecuada.
+        ]]></missing_extender>
+    </admin>
+    
+</language>

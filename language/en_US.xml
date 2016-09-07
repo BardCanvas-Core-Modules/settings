@@ -1,10 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <language>
     
-    <!-- #################################### -->
-    <!-- Settings module language definitions -->
-    <!-- #################################### -->
-    
     <display_name>Settings editor</display_name>
     <icon>fa-gears</icon>
     <description>
