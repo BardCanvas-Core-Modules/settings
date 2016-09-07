@@ -320,7 +320,11 @@ $undefined_vars = array();
                                 <span class="framed_content inlined fixed_font" style="font-weight: normal;"><?= $data->name ?></span>
                             </div>
                             <blockquote>
-                                <?= $specs->description ?>
+                                <?= replace_escaped_vars(
+                                    $specs->description,
+                                    array('{$full_root_url}'),
+                                    array($config->full_root_url)
+                                ) ?>
                             </blockquote>
                             <!--<span class="framed_content inlined"><?= $data->name ?></span>-->
                         </td>
