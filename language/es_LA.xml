@@ -40,7 +40,7 @@
             Módulo requerido: <span class="framed_content inlined">{$module}</span><br>
             Área de anclaje: <span class="framed_content inlined">{$area}</span><br>
             Marcador de anclaje: <span class="framed_content inlined">{$marker}</span><br>
-            Es posible que necesites instalar/habilitar el módulo referenciado para editar el valor de forma adecuada.
+            Es posible que necesites instalar/activar el módulo referenciado para editar el valor de forma adecuada.
         ]]></missing_extender>
     </admin>
     
