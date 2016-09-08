@@ -235,6 +235,7 @@ $undefined_vars = array();
               onclick="show_settings_group(this)"><?= $current_module->language->admin->record_nav->show_all ?></span>
         
         <?
+        $tabs = array();
         foreach($var_groups as $group_name => $group_data):
             /** @var \SimpleXMLElement $group_language */
             if( $group_name == "engine" ) $group_language = $language;
@@ -243,8 +244,13 @@ $undefined_vars = array();
             if( empty($group_language->settings_data) ) continue;
             
             $group_language = $group_language->settings_data;
-            $group_title    = $group_language->title;
-            ?>
+            $group_title    = trim($group_language->title);
+            
+            $tabs[$group_title] = $group_name;
+        endforeach;
+        
+        ksort($tabs);
+        foreach($tabs as $group_title => $group_name): ?>
             <span class="toplink framed_content pseudo_link" data-group-name="<?= sanitize_file_name($group_name) ?>"
                   onmouseover="$(this).toggleClass('state_hover', true)" onmouseout="$(this).toggleClass('state_hover', false)"
                   onclick="show_settings_group(this)"><?= $group_title ?></span>
