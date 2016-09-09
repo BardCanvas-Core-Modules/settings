@@ -638,7 +638,9 @@ function render_settings_editor($type, $name, $value, $specs = null)
                 return;
             }
             
-            $config->globals["$hook_area/$hook_marker"] = array("name" => $name, "value" => $value);
+            $config->globals["$hook_area/$hook_marker"] = array(
+                "name" => $name, "value" => $value, "options" => $specs->options
+            );
             $current_module->load_extensions($hook_area, $hook_marker);
             
             return;
