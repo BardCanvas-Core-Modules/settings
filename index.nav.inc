@@ -61,6 +61,7 @@ while($row = $database->fetch_object($res))
 }
 
 $undefined_vars = array();
+$selected_group = stripslashes($_GET["selected_group"]);
 ?>
 
 <!-- Extender inits -->
@@ -96,6 +97,8 @@ $undefined_vars = array();
 
 <script type="text/javascript">
     
+    var selected_group = '<?= addslashes($selected_group) ?>';
+    
     $(document).ready(function()
     {
         $('textarea.CodeMirror').each(function()
@@ -124,7 +127,10 @@ $undefined_vars = array();
                 return;
             }
             
-            location.href = '<?= $_SERVER["PHP_SELF"] ?>?wasuuup=<?= md5(mt_rand(1, 65535)) ?>';
+            location.href
+                = $_PHP_SELF
+                + '?selected_group=' + encodeURI(selected_group) 
+                + '&wasuuup='        + parseInt(Math.random() * 1000000000000000);
         }
         
         $('#settings_form').ajaxForm({
@@ -229,6 +235,8 @@ $undefined_vars = array();
 
 <form method="post" id="settings_form" action="<?= $_SERVER["PHP_SELF"] ?>?wasuuup=<?=md5(mt_rand(1,65535))?>">
     
+    <input type="hidden" name="show_group" value="<?= $_POST["show_group"] ?>">
+    
     <div class="toplinks">
         <span class="toplink framed_content pseudo_link" data-group-name="*"
               onmouseover="$(this).toggleClass('state_hover', true)" onmouseout="$(this).toggleClass('state_hover', false)"
@@ -236,10 +244,11 @@ $undefined_vars = array();
         
         <?
         $tabs = array();
-        foreach($var_groups as $group_name => $group_data):
+        foreach($var_groups as $group_name => $group_data)
+        {
             /** @var \SimpleXMLElement $group_language */
             if( $group_name == "engine" ) $group_language = $language;
-            else                          $group_language = $modules[str_replace("modules:", "", $group_name)]->language;
+            else                          $group_language = $modules[str_replace("modules:", "", $group_name )]->language;
             
             if( empty($group_language->settings_data) ) continue;
             
@@ -247,11 +256,12 @@ $undefined_vars = array();
             $group_title    = trim($group_language->title);
             
             $tabs[$group_title] = $group_name;
-        endforeach;
+        }
         
         ksort($tabs);
-        foreach($tabs as $group_title => $group_name): ?>
-            <span class="toplink framed_content pseudo_link" data-group-name="<?= sanitize_file_name($group_name) ?>"
+        foreach($tabs as $group_title => $group_name):
+            $class = $group_name == $selected_group ? "state_active" : ""; ?>
+            <span class="toplink framed_content <?= $class ?> pseudo_link" data-group-name="<?= sanitize_file_name($group_name) ?>"
                   onmouseover="$(this).toggleClass('state_hover', true)" onmouseout="$(this).toggleClass('state_hover', false)"
                   onclick="show_settings_group(this)"><?= $group_title ?></span>
         <? endforeach; ?>
@@ -273,9 +283,10 @@ $undefined_vars = array();
         
         $group_language = $group_language->settings_data;
         $details_class = "";
+        $group_style   = ($selected_group != "" && $group_name != $selected_group) ? "display: none;" : "";
         ?>
         
-        <div class="table_wrapper group_container" data-group-name="<?= sanitize_file_name($group_name) ?>">
+        <div class="table_wrapper group_container" data-group-name="<?= sanitize_file_name($group_name) ?>" style="<?= $group_style ?>">
             
             <table class="settings_group nav_table no_highlight">
                 
@@ -354,7 +365,7 @@ $undefined_vars = array();
                    <span class="fa fa-arrow-up"></span>
                     <?= $current_module->language->back_to_top ?>
                 </a>
-                <button type="submit" class="pull-right">
+                <button type="submit" class="pull-right" onclick="selected_group = '<?= addslashes($group_name) ?>';">
                     <span class="fa fa-save"></span>
                     <?= $current_module->language->admin->record_nav->save_now ?>
                 </button>
@@ -366,9 +377,10 @@ $undefined_vars = array();
     <? if( ! empty($undefined_vars)): ?>
         
         <? $warning_echoed = false; ?>
-        <? foreach($undefined_vars as $group_name => $group_data): ?>
+        <? foreach($undefined_vars as $group_name => $group_data):
+            $group_style = ($selected_group != "" && $group_name != "@!orphan") ? "display: none;" : "";?>
             
-            <div class="table_wrapper group_container" data-group-name="@!orphan">
+            <div class="table_wrapper group_container" data-group-name="@!orphan" style="<?= $group_style ?>">
                 
                 <? if( ! $warning_echoed ): ?>
                     <div class="framed_content state_ko" style="margin-top: 0;">
@@ -408,7 +420,7 @@ $undefined_vars = array();
                         <span class="fa fa-arrow-up"></span>
                         <?= $current_module->language->back_to_top ?>
                     </a>
-                    <button type="submit" class="pull-right">
+                    <button type="submit" class="pull-right" onclick="selected_group = '@!orphan';">
                         <span class="fa fa-save"></span>
                         <?= $current_module->language->admin->record_nav->save_now ?>
                     </button>
