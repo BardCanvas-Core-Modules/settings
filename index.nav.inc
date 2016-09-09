@@ -73,6 +73,10 @@ $selected_group = stripslashes($_GET["selected_group"]);
 
 <!-- CodeMirror -->
 <script                 src="<?=$config->full_root_path?>/lib/CodeMirror-5.16.2/lib/codemirror.js"></script>
+<script                 src="<?=$config->full_root_path?>/lib/CodeMirror-5.16.2/mode/xml/xml.js"></script>
+<script                 src="<?=$config->full_root_path?>/lib/CodeMirror-5.16.2/mode/javascript/javascript.js"></script>
+<script                 src="<?=$config->full_root_path?>/lib/CodeMirror-5.16.2/mode/css/css.js"></script>
+<script                 src="<?=$config->full_root_path?>/lib/CodeMirror-5.16.2/mode/htmlmixed/htmlmixed.js"></script>
 <link rel="stylesheet" href="<?=$config->full_root_path?>/lib/CodeMirror-5.16.2/lib/codemirror.css">
 <style type="text/css">
     .CodeMirror {
@@ -101,14 +105,27 @@ $selected_group = stripslashes($_GET["selected_group"]);
     
     $(document).ready(function()
     {
-        $('textarea.CodeMirror').each(function()
+        $('textarea.CodeMirror:not(.wrapped)').each(function()
         {
             var element = $(this).get(0);
             
             CodeMirror.fromTextArea(element, {
                 viewPortMargin: Infinity,
-                lineNumbers:    true
+                lineNumbers:    true,
+                mode:           'htmlmixed'
             }); 
+        });
+        
+        $('textarea.CodeMirror.wrapped').each(function()
+        {
+            var element = $(this).get(0);
+            
+            CodeMirror.fromTextArea(element, {
+                viewPortMargin: Infinity,
+                lineNumbers:    true,
+                lineWrapping:   true,
+                mode:           'htmlmixed'
+            });
         });
         
         function prepare_form_submission()
@@ -138,6 +155,11 @@ $selected_group = stripslashes($_GET["selected_group"]);
             beforeSubmit: prepare_form_submission,
             success:      process_form_response
         });
+        
+        if( selected_group != '' )
+        {
+            $.scrollTo(sprintf('div[data-raw-group-name="%s"]', selected_group), 500);
+        }
     });
     
     function filter_settings()
@@ -260,7 +282,7 @@ $selected_group = stripslashes($_GET["selected_group"]);
         
         ksort($tabs);
         foreach($tabs as $group_title => $group_name):
-            $class = $group_name == $selected_group ? "state_active" : ""; ?>
+            $class = ""; # $group_name == $selected_group ? "state_active" : ""; ?>
             <span class="toplink framed_content <?= $class ?> pseudo_link" data-group-name="<?= sanitize_file_name($group_name) ?>"
                   onmouseover="$(this).toggleClass('state_hover', true)" onmouseout="$(this).toggleClass('state_hover', false)"
                   onclick="show_settings_group(this)"><?= $group_title ?></span>
@@ -283,10 +305,11 @@ $selected_group = stripslashes($_GET["selected_group"]);
         
         $group_language = $group_language->settings_data;
         $details_class = "";
-        $group_style   = ($selected_group != "" && $group_name != $selected_group) ? "display: none;" : "";
+        $group_style   = ""; # ($selected_group != "" && $group_name != $selected_group) ? "display: none;" : "";
         ?>
         
-        <div class="table_wrapper group_container" data-group-name="<?= sanitize_file_name($group_name) ?>" style="<?= $group_style ?>">
+        <div class="table_wrapper group_container" data-group-name="<?= sanitize_file_name($group_name) ?>" 
+             data-raw-group-name="<?= $group_name ?>" style="<?= $group_style ?>">
             
             <table class="settings_group nav_table no_highlight">
                 
@@ -376,11 +399,13 @@ $selected_group = stripslashes($_GET["selected_group"]);
     
     <? if( ! empty($undefined_vars)): ?>
         
+        <div data-raw-group-name="__orphan__"></div>
+        
         <? $warning_echoed = false; ?>
         <? foreach($undefined_vars as $group_name => $group_data):
-            $group_style = ($selected_group != "" && $group_name != "@!orphan") ? "display: none;" : "";?>
+            $group_style = ""; # ($selected_group != "" && $group_name != "__orphan__") ? "display: none;" : "";?>
             
-            <div class="table_wrapper group_container" data-group-name="@!orphan" style="<?= $group_style ?>">
+            <div class="table_wrapper group_container" data-group-name="__orphan__" style="<?= $group_style ?>">
                 
                 <? if( ! $warning_echoed ): ?>
                     <div class="framed_content state_ko" style="margin-top: 0;">
@@ -408,7 +433,7 @@ $selected_group = stripslashes($_GET["selected_group"]);
                                 <span class="framed_content inlined fixed_font" style="font-weight: normal;"><?= $data->name ?></span>
                             </td>
                             <td width="30%">
-                                <? render_settings_editor("textarea", $data->name, $data->value, null) ?>
+                                <textarea class='CodeMirror wrapped' name='names[<?= $data->name ?>]'><?= htmlspecialchars($data->value) ?></textarea>
                             </td>
                         </tr>
                     <? endforeach; ?>
@@ -420,7 +445,7 @@ $selected_group = stripslashes($_GET["selected_group"]);
                         <span class="fa fa-arrow-up"></span>
                         <?= $current_module->language->back_to_top ?>
                     </a>
-                    <button type="submit" class="pull-right" onclick="selected_group = '@!orphan';">
+                    <button type="submit" class="pull-right" onclick="selected_group = '__orphan__';">
                         <span class="fa fa-save"></span>
                         <?= $current_module->language->admin->record_nav->save_now ?>
                     </button>
@@ -430,7 +455,7 @@ $selected_group = stripslashes($_GET["selected_group"]);
         <? endforeach; ?>
         
         <script type="text/javascript">
-            var html = "<span class=\"toplink framed_content pseudo_link\" data-group-name=\"@!orphan\" "
+            var html = "<span class=\"toplink framed_content pseudo_link\" data-group-name=\"__orphan__\" "
                 + "onmouseover=\"$(this).toggleClass('state_hover', true)\" "
                 + "onmouseout=\"$(this).toggleClass('state_hover', false)\" "
                 + "onclick=\"show_settings_group(this)\">"
