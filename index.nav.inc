@@ -147,7 +147,7 @@ $selected_group = stripslashes($_GET["selected_group"]);
             location.href
                 = $_PHP_SELF
                 + '?selected_group=' + encodeURI(selected_group) 
-                + '&wasuuup='        + parseInt(Math.random() * 1000000000000000);
+                + '&wasuuup='        + wasuuup();
         }
         
         $('#settings_form').ajaxForm({
