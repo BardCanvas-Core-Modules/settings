@@ -283,7 +283,7 @@ $selected_group = stripslashes($_GET["selected_group"]);
         ksort($tabs);
         foreach($tabs as $group_title => $group_name):
             $class = ""; # $group_name == $selected_group ? "state_active" : ""; ?>
-            <span class="toplink framed_content <?= $class ?> pseudo_link" data-group-name="<?= sanitize_file_name($group_name) ?>"
+            <span class="toplink framed_content <?= $class ?> pseudo_link" data-group-name="<?= wp_sanitize_filename($group_name) ?>"
                   onmouseover="$(this).toggleClass('state_hover', true)" onmouseout="$(this).toggleClass('state_hover', false)"
                   onclick="show_settings_group(this)"><?= $group_title ?></span>
         <? endforeach; ?>
@@ -308,7 +308,7 @@ $selected_group = stripslashes($_GET["selected_group"]);
         $group_style   = ""; # ($selected_group != "" && $group_name != $selected_group) ? "display: none;" : "";
         ?>
         
-        <div class="table_wrapper group_container" data-group-name="<?= sanitize_file_name($group_name) ?>" 
+        <div class="table_wrapper group_container" data-group-name="<?= wp_sanitize_filename($group_name) ?>" 
              data-raw-group-name="<?= $group_name ?>" style="<?= $group_style ?>">
             
             <table class="settings_group nav_table no_highlight">
@@ -518,7 +518,7 @@ function render_settings_editor($type, $name, $value, $specs = null)
     
     if( $type == "template_selector" )
     {
-        $installed_templates = glob(ABSPATH . "/templates/*", GLOB_ONLYDIR);
+        $installed_templates = glob(ROOTPATH . "/templates/*", GLOB_ONLYDIR);
         
         echo "<select name='names[{$name}]'>";
         foreach($installed_templates as $template_dir)
@@ -536,7 +536,7 @@ function render_settings_editor($type, $name, $value, $specs = null)
     if( $type == "locale_list" )
     {
         $options           = array();
-        $installed_locales = glob(ABSPATH . "/language/*.xml");
+        $installed_locales = glob(ROOTPATH . "/language/*.xml");
         foreach($installed_locales as $locale_file)
         {
             $xml     = simplexml_load_file($locale_file);
