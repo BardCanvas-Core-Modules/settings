@@ -7,9 +7,12 @@
  * @author     Alejandro Caballero - lava.caballero@gmail.com
  */
 
+use hng2_base\config;
+
 include "../config.php";
 include "../includes/bootstrap.inc";
-if( ! $account->_is_admin ) throw_fake_404();
+
+if( $account->level < config::COADMIN_USER_LEVEL ) throw_fake_404();
 
 if( ! empty($_POST["names"]) )
 {

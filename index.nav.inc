@@ -12,23 +12,45 @@ use hng2_base\module;
 
 $var_groups = array();
 
-foreach($language->settings_data->specs as $spec)
+# Engine settings are for strict admins
+if( $account->level >= config::ADMIN_USER_LEVEL )
 {
-    if( $spec["is_separator"] )
-        $var_groups["engine"][trim($spec)] = (object) array(
-            "name"  => "engine." . trim($spec),
-            "value" => "___SEPARATOR___"
-        );
-    else
-        $var_groups["engine"][trim($spec["key"])] = (object) array(
-            "name"  => "engine." . trim($spec["key"]),
-            "value" => ""
-        );
+    foreach($language->settings_data->specs as $spec)
+    {
+        if( $spec["is_separator"] )
+            $var_groups["engine"][trim($spec)] = (object) array(
+                "name"  => "engine." . trim($spec),
+                "value" => "___SEPARATOR___"
+            );
+        else
+            $var_groups["engine"][trim($spec["key"])] = (object) array(
+                "name"  => "engine." . trim($spec["key"]),
+                "value" => ""
+            );
+    }
 }
 
+$skipped_groups = array();
+if( $account->level < config::ADMIN_USER_LEVEL ) $skipped_groups[] = "engine";
 foreach($modules as $module)
 {
+    if( empty($module->language->settings_data) ) continue;
     if( empty($module->language->settings_data->specs) ) continue;
+    
+    $min_level = trim($module->language->settings_data["allow_admin_level"]);
+    # echo "<p>[$min_level] --- [$account->level]</p>";
+    if( empty($min_level) && $account->level < config::ADMIN_USER_LEVEL )
+    {
+        $skipped_groups[] = "modules:{$module->name}";
+        
+        continue;
+    }
+    if( ! empty($min_level) && $account->level < $min_level )
+    {
+        $skipped_groups[] = "modules:{$module->name}";
+        
+        continue;
+    }
     
     foreach($module->language->settings_data->specs as $spec)
         $var_groups["modules:{$module->name}"][trim($spec["key"])] = (object) array(
@@ -36,6 +58,7 @@ foreach($modules as $module)
             "value" => ""
         );
 }
+# echo "<pre>" . print_r($skipped_groups, true) . "</pre>";
 
 $query = "
     select * from settings
@@ -51,13 +74,16 @@ while($row = $database->fetch_object($res))
     $group_name = $matches[1];
     $var_key    = $matches[2];
     
+    if( in_array($group_name, $skipped_groups) ) continue;
+    
     if( isset($var_groups[$group_name][$var_key]) )
         $var_groups[$group_name][$var_key]->value = $row->value;
     else
-        $var_groups[$group_name][$var_key] = (object) array(
-            "name"  => $row->name,
-            "value" => $row->value,
-        );
+        if( $account->level >= config::ADMIN_USER_LEVEL )
+            $var_groups[$group_name][$var_key] = (object) array(
+                "name"  => $row->name,
+                "value" => $row->value,
+            );
 }
 
 $undefined_vars = array();
@@ -259,7 +285,7 @@ $selected_group = stripslashes($_GET["selected_group"]);
     
     <input type="hidden" name="show_group" value="<?= $_POST["show_group"] ?>">
     
-    <div class="toplinks">
+    <div class="toplinks" style="<? if(count($var_groups) <= 1) echo "display: none;"; ?>">
         <span class="toplink framed_content pseudo_link" data-group-name="*"
               onmouseover="$(this).toggleClass('state_hover', true)" onmouseout="$(this).toggleClass('state_hover', false)"
               onclick="show_settings_group(this)"><?= $current_module->language->admin->record_nav->show_all ?></span>
