@@ -44,4 +44,18 @@
         ]]></missing_extender>
     </admin>
     
+    <add>
+        <caption>Añadir...</caption>
+        <prompt><![CDATA[
+            Indica un identificador/llave para la variable.
+            Usar solo caracteres alfanuméricos en minúsculas,
+            guiones bajos, puntos y dos puntos (:).
+             
+            De preferencia, prefíjala con un guión bajo para evitar
+            colisiones con variables predefinidas.
+        ]]></prompt>
+        <name_not_provided>Especifica un nombre para la variable.</name_not_provided>
+        <name_already_exists>El nombre que has especificado ya existe.</name_already_exists>
+    </add>
+    
 </language>

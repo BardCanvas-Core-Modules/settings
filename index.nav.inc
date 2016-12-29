@@ -109,15 +109,18 @@ $selected_group = stripslashes($_GET["selected_group"]);
         border: 1px solid silver;
         height: auto;
         font-family: 'Lucida Console', 'Courier new', Courier, monospace !important; font-size: 8pt;
-        /*max-width: 99%;*/
+        width: 40vw;
     }
     td.indented { padding-left: 18px; }
+    td.details  { width: 60%; }
+    td.control  { width: 40%; }
 
     .toplinks          { margin-bottom: 10px; }
     .toplinks .toplink { margin: 0 5px 5px 0; font-family: "Arial Narrow", Arial, Arial, Helvetica, sans-serif; }
     
+    #settings_filter                    { display: inline-block; font-size: 24px; line-height: 24px; white-space: nowrap; }
     #settings_filter input[type="text"] { padding-right: 24px; }
-    #settings_filter .cleanup           { position: absolute; margin-left: -24px; margin-top: 2px; cursor: pointer; color: ButtonText; }
+    #settings_filter .cleanup           { position: absolute; margin-left: -24px; margin-top: 8px; cursor: pointer; color: ButtonText; }
     
     .highlight { background-color: yellow }
 </style>
@@ -261,7 +264,35 @@ $selected_group = stripslashes($_GET["selected_group"]);
         $form.find('.group_container:not([data-group-name="' +  group_name + '"])').hide();
         $form.find('.group_container[data-group-name="' +  group_name + '"]').show();
     }
+    
+    function add_setting()
+    {
+        var add_prompt = $('#add_prompt').text();
+        var var_name   = prompt(add_prompt, '');
+        if( var_name == null ) return;
+        
+        var url    = $_FULL_ROOT_PATH + '/settings/add_custom.php';
+        var params = {
+            name:    var_name,
+            wasuuup: wasuuup()
+        };
+        $.blockUI(blockUI_default_params);
+        $.get(url, params, function(response)
+        {
+            if( response != 'OK' )
+            {
+                alert(response);
+                
+                $.unblockUI();
+                return;
+            }
+            
+            location.href = $_FULL_ROOT_PATH + sprintf('/settings/?wasuuup=%s#orphan', wasuuup());
+        });
+    }
 </script>
+
+<div id="add_prompt" style="display: none;"><?= unindent($current_module->language->add->prompt) ?></div>
 
 <a name="top"></a>
 <h1 class="clearfix">
@@ -272,10 +303,15 @@ $selected_group = stripslashes($_GET["selected_group"]);
     
     <?= $current_module->language->admin->record_nav->page_title ?>
     
+    <button onclick="add_setting()">
+        <span class="fa fa-plus"></span>
+        <?= $current_module->language->add->caption ?>
+    </button>
+    
     <span id="settings_filter">
         <input type="text" placeholder="<?= $current_module->language->lookup_caption ?>"
                onkeyup="filter_settings()" onchange="filter_settings()">
-        <span class="cleanup fa fa-times fa-fw" onclick="clear_settings_filter()"></span>
+        <img class="cleanup" onclick="clear_settings_filter()" src="<?= $config->full_root_path ?>/media/backspace.png">
     </span>
 </h1>
 
@@ -379,7 +415,7 @@ $selected_group = stripslashes($_GET["selected_group"]);
                     if($specs["highlight_class"])     $class .= " {$specs["highlight_class"]}";
                     ?>
                     <tr class="searchable <?= $class ?>">
-                        <td width="70%" class="searchable_target <?= $details_class ?>">
+                        <td class="details searchable_target <?= $details_class ?>">
                             <div class="principal_data">
                                 <? if($specs["is_locked"] == "true") echo "<span class='fa fa-lock'></span>" ?>
                                 <?= $specs->title ?>
@@ -394,7 +430,7 @@ $selected_group = stripslashes($_GET["selected_group"]);
                             </blockquote>
                             <!--<span class="framed_content inlined"><?= $data->name ?></span>-->
                         </td>
-                        <td class="control" width="30%">
+                        <td class="control">
                             <?
                             if($specs["is_locked"] != "true")
                                 render_settings_editor($specs->type, $data->name, $data->value, $specs);
@@ -425,6 +461,7 @@ $selected_group = stripslashes($_GET["selected_group"]);
     
     <? if( ! empty($undefined_vars)): ?>
         
+        <a name="orphan"></a>
         <div data-raw-group-name="__orphan__"></div>
         
         <? $warning_echoed = false; ?>
@@ -454,12 +491,12 @@ $selected_group = stripslashes($_GET["selected_group"]);
                     <tbody>
                     <? foreach($group_data as $key => $data): ?>
                         <tr class="searchable">
-                            <td width="70%" class="searchable_target">
+                            <td class="details searchable_target">
                                 <div class="principal_data"><?= ucwords(str_replace("_", " ", $key)) ?></div>
                                 <span class="framed_content inlined fixed_font" style="font-weight: normal;"><?= $data->name ?></span>
                             </td>
-                            <td width="30%">
-                                <textarea class='CodeMirror wrapped' name='names[<?= $data->name ?>]'><?= htmlspecialchars($data->value) ?></textarea>
+                            <td class="control">
+                                <textarea class='CodeMirror' name='names[<?= $data->name ?>]'><?= htmlspecialchars($data->value) ?></textarea>
                             </td>
                         </tr>
                     <? endforeach; ?>

@@ -42,4 +42,18 @@
         ]]></missing_extender>
     </admin>
     
+    <add>
+        <caption>Add custom...</caption>
+        <prompt><![CDATA[
+            Type an identifier/key for the variable.
+            Use only alphanumeric lowercase chars,
+            underscores, dots and semicolons.
+             
+            You should prefix it with an underscore to avoid
+            any collission with standard variables.
+        ]]></prompt>
+        <name_not_provided>Please provide a name for the variable.</name_not_provided>
+        <name_already_exists>The name you provided already exists.</name_already_exists>
+    </add>
+    
 </language>
