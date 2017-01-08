@@ -655,6 +655,16 @@ function render_settings_editor($type, $name, $value, $specs = null)
         return;
     }
     
+    if( $type == "button" )
+    {
+        # Note: the "onclick" option must include a "return false" statement or the form will be submitted!
+        echo "
+            <button style='{$specs->options->style}' onclick='{$specs->options->onclick}'>{$specs->options->caption}</button>
+        ";
+        
+        return;
+    }
+    
     /**
      * Here, the type is defined in the language file as follows:
      * <type>@gallery:specs_renderer/image_selector</type>
