@@ -106,11 +106,12 @@ $selected_group = stripslashes($_GET["selected_group"]);
 <link rel="stylesheet" href="<?=$config->full_root_path?>/lib/CodeMirror-5.16.2/lib/codemirror.css">
 <style type="text/css">
     .CodeMirror {
-        border: 1px solid silver;
-        height: auto;
+        border:      1px solid silver;
+        height:      auto;
         font-family: 'Lucida Console', 'Courier new', Courier, monospace !important; font-size: 8pt;
-        width: 40vw;
+        width:       40vw;
     }
+    .CodeMirror-scroll { max-height: 80vh; }
     td.indented { padding-left: 18px; }
     td.details  { width: 60%; }
     td.control  { width: 40%; }
@@ -139,7 +140,7 @@ $selected_group = stripslashes($_GET["selected_group"]);
             var element = $(this).get(0);
             
             CodeMirror.fromTextArea(element, {
-                viewPortMargin: Infinity,
+                // viewPortMargin: Infinity,
                 lineNumbers:    true,
                 mode:           'htmlmixed'
             }); 
@@ -150,7 +151,7 @@ $selected_group = stripslashes($_GET["selected_group"]);
             var element = $(this).get(0);
             
             CodeMirror.fromTextArea(element, {
-                viewPortMargin: Infinity,
+                // viewPortMargin: Infinity,
                 lineNumbers:    true,
                 lineWrapping:   true,
                 mode:           'htmlmixed'
