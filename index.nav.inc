@@ -535,7 +535,7 @@ $selected_group = stripslashes($_GET["selected_group"]);
 $generation_index = 0;
 function render_settings_editor($type, $name, $value, $specs = null)
 {
-    global $language, $generation_index, $current_module, $config;
+    global $language, $generation_index, $current_module, $config, $database;
     
     $generation_index++;
     $type = trim($type);
@@ -613,6 +613,25 @@ function render_settings_editor($type, $name, $value, $specs = null)
         $options = array_merge(array("en_US" => $english), $options);
         
         echo "<select name='names[{$name}]'>";
+        foreach($options as $iso => $caption)
+        {
+            $selected = $iso == $value ? "selected" : "";
+            echo "<option {$selected} value='{$iso}'>{$caption}</option>";
+        }
+        echo "</select>";
+        
+        return;
+    }
+    
+    if( $type == "country" )
+    {
+        $options = array();
+        $res     = $database->query("select * from countries order by name");
+        while( $row = $database->fetch_object($res) ) $options[$row->alpha_2] = $row->name;
+    
+        $selected = empty($value) ? "selected" : "";
+        echo "<select name='names[{$name}]'>";
+        echo "<option {$selected} value=''>{$current_module->language->please_select_an_option}</option>";
         foreach($options as $iso => $caption)
         {
             $selected = $iso == $value ? "selected" : "";

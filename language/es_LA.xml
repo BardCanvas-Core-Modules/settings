@@ -6,9 +6,10 @@
     <description>
         Editor de configuración del sistema.
     </description>
-
+    
     <back_to_top>Regresar al inicio</back_to_top>
     <lookup_caption>Buscar entre descripciones</lookup_caption>
+    <please_select_an_option>Selecciona una opción</please_select_an_option>
     
     <admin>
         <menu_items>
