@@ -554,6 +554,25 @@ function render_settings_editor($type, $name, $value, $specs = null)
         return;
     }
     
+    if( $type == "user_level_selector" )
+    {
+        $default = trim($specs->options->default);
+        if( empty($default) ) $default = 10;
+        if( empty($value) ) $value = $default;
+        
+        echo "<select name='names[{$name}]'>";
+        foreach($config->user_levels_by_level as $level => $title)
+        {
+            if( $level <= 1 ) continue;
+            
+            $selected = $level == $value ? "selected" : "";
+            echo "<option {$selected} value='{$level}'>{$level} - {$title}</option>";
+        }
+        echo "</select>";
+        
+        return;
+    }
+    
     if( $type == "boolean" )
     {
         $value     = $value == "true" ? "true" : "false";
