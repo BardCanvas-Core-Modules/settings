@@ -619,10 +619,15 @@ function render_settings_editor($type, $name, $value, $specs = null)
         echo "<select name='names[{$name}]'>";
         foreach($installed_templates as $template_dir)
         {
-            $template_name = basename($template_dir);
+            $xml_file = "{$template_dir}/template_info.xml";
+            if( ! file_exists($xml_file) ) continue;
             
-            $selected = $template_name == $value ? "selected" : "";
-            echo "<option {$selected} value='{$template_name}'>{$template_name}</option>";
+            $template_key  = basename($template_dir);
+            $template_xml  = simplexml_load_file($xml_file);
+            $template_name = "{$template_xml->name} {$template_xml->version}";
+            
+            $selected = $template_key == $value ? "selected" : "";
+            echo "<option {$selected} value='{$template_key}'>{$template_name}</option>";
         }
         echo "</select>";
         
