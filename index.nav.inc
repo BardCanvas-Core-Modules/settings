@@ -422,6 +422,19 @@ $selected_group = stripslashes($_GET["selected_group"]);
                                 <?= $specs->title ?>
                                 <span class="framed_content inlined fixed_font" style="font-weight: normal;"><?= $data->name ?></span>
                             </div>
+                            <? if( isset($specs->options->check_if_php_function_exists) ):
+                                $exists  = function_exists(trim($specs->options->check_if_php_function_exists->function_name));
+                                $class   = $exists ? "state_active" : "state_ko";
+                                $caption = $exists ? $specs->options->check_if_php_function_exists->if_exists
+                                         : $specs->options->check_if_php_function_exists->if_not_exists;
+                                $icon    = $exists ? "fa-check" : "fa-times"; ?>
+                                <blockquote>
+                                    <div class="framed_content <?= $class ?>">
+                                        <i class="fa <?= $icon ?>"></i>
+                                        <?= $caption ?>
+                                    </div>
+                                </blockquote>
+                            <? endif; ?>
                             <blockquote>
                                 <?= replace_escaped_vars(
                                     $specs->description,
