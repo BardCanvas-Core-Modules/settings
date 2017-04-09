@@ -53,12 +53,15 @@ foreach($modules as $module)
     }
     
     foreach($module->language->settings_data->specs as $spec)
-        $var_groups["modules:{$module->name}"][trim($spec["key"])] = (object) array(
-            "name"  => "modules:{$module->name}." . trim($spec["key"]),
-            "value" => ""
+    {
+        $key = trim($spec["key"]); if( empty($key) ) $key = trim($spec);
+        $var_groups["modules:{$module->name}"][$key] = (object) array(
+            "name"  => "modules:{$module->name}.{$key}",
+            "value" => $spec["is_separator"] ? "___SEPARATOR___" : ""
         );
+    }
 }
-# echo "<pre>" . print_r($skipped_groups, true) . "</pre>";
+# echo "<pre>" . print_r($var_groups, true) . "</pre>";
 
 $query = "
     select * from settings
@@ -355,11 +358,13 @@ $selected_group = stripslashes($_GET["selected_group"]);
     <?
     foreach($var_groups as $group_name => $group_data):
         
+        # echo "<pre>" . print_r($group_data, true) . "</pre>";
+        
         /** @var \SimpleXMLElement $group_language */
         if( $group_name == "engine" ) $group_language = $language;
         else                          $group_language = $modules[str_replace("modules:", "", $group_name)]->language;
         
-        if( empty($group_language->settings_data) )
+        if( $group_data->value != "___SEPARATOR___" && empty($group_language->settings_data) )
         {
             $undefined_vars[$group_name] = $group_data;
             
@@ -402,6 +407,7 @@ $selected_group = stripslashes($_GET["selected_group"]);
                     
                     /** @var \SimpleXMLElement $specs */
                     $specs = current($group_language->xpath("//specs[@key='$key']"));
+                    
                     if( empty($specs) )
                     {
                         $undefined_vars[$group_name][$key] = $data;
