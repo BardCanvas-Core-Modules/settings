@@ -1,6 +1,10 @@
 
 # Settings Module Change Log
 
+## [1.4.9] - 2017-04-10
+
+- Implemented separators for modules.
+
 ## [1.4.8] - 2017-03-28
 
 - Added name and version of current templates on the templates selector.
