@@ -18,6 +18,7 @@ if( ! empty($_POST["names"]) )
 {
     $messages = array();
     
+    $settings->prepare_batch();
     foreach($_POST["names"] as $key => $val)
     {
         $val = trim(stripslashes($val));
@@ -30,7 +31,10 @@ if( ! empty($_POST["names"]) )
     }
     
     if( count($messages) > 0 )
+    {
+        $settings->commit_batch();
         send_notification($account->id_account, "success", implode("\n", $messages));
+    }
     
     die("OK");
 }
