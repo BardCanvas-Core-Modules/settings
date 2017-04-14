@@ -1,6 +1,10 @@
 
 # Settings Module Change Log
 
+## [1.4.10] - 2017-04-13
+
+- Implemented batch mode support on saves.
+
 ## [1.4.9] - 2017-04-10
 
 - Implemented separators for modules.
