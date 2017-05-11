@@ -325,6 +325,7 @@ $selected_group = stripslashes($_GET["selected_group"]);
 
 <form method="post" id="settings_form" action="<?= $_SERVER["PHP_SELF"] ?>?wasuuup=<?=md5(mt_rand(1,65535))?>">
     
+    <input type="hidden" name="mode"       value="save">
     <input type="hidden" name="show_group" value="<?= $_POST["show_group"] ?>">
     
     <div class="toplinks" style="<? if(count($var_groups) <= 1) echo "display: none;"; ?>">
@@ -514,6 +515,13 @@ $selected_group = stripslashes($_GET["selected_group"]);
                     <? foreach($group_data as $key => $data): ?>
                         <tr class="searchable">
                             <td class="details searchable_target">
+                                <span class="pull-right">
+                                    <label>
+                                        <input type="checkbox" name="deletes[]" value="<?= $data->name ?>" style="display: none;"
+                                               onchange="var $this = $(this); var checked = $this.prop('checked'); $this.closest('label').toggleClass('critical', checked);">
+                                        <i class="fa fa-trash fa-fw"></i>
+                                    </label>
+                                </span>
                                 <div class="principal_data"><?= ucwords(str_replace("_", " ", $key)) ?></div>
                                 <span class="framed_content inlined fixed_font" style="font-weight: normal;"><?= $data->name ?></span>
                             </td>

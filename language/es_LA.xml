@@ -23,6 +23,7 @@
             <errors>
                 <empty_val>El elemento "{$name}" no puede tener un valor vacío. Favor de verificar.</empty_val>
                 <var_ok>Elemento "{$name}" guardado.</var_ok>
+                <var_deleted>Elemento "{$name}" eliminado.</var_deleted>
             </errors>
         </record_nav>
         <undefined_settings><![CDATA[

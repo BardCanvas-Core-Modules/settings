@@ -23,6 +23,7 @@
             <errors>
                 <empty_val>Setting "{$name}" cannot have an empty value. Please check it.</empty_val>
                 <var_ok>Setting "{$name}" saved.</var_ok>
+                <var_deleted>Setting "{$name}" deleted.</var_deleted>
             </errors>
         </record_nav>
         <undefined_settings><![CDATA[
