@@ -459,7 +459,7 @@ $selected_group = stripslashes($_GET["selected_group"]);
                                 render_settings_editor($specs->type, $data->name, $data->value, $specs);
                             else
                                 echo "<div class='framed_content disabled'>" 
-                                    . ($data->value == "" ? "&mdash;" : $data->value) 
+                                    . ($data->value == "" ? "&mdash;" : nl2br($data->value)) 
                                     . "</div>";
                             ?>
                         </td>
