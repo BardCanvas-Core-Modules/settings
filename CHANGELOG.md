@@ -1,6 +1,12 @@
 
 # Settings Module Change Log
 
+## [1.5.0] - 2017-05-13
+
+- Detached functions so they can be included on other modules to build custom settings editors.
+- Added capability to delete custom vars.
+- Tuned displaying of locked items.
+
 ## [1.4.10] - 2017-04-13
 
 - Implemented batch mode support on saves.
