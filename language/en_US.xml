@@ -58,4 +58,10 @@
         <name_already_exists>The name you provided already exists.</name_already_exists>
     </add>
     
+    <select>Select</select>
+    <preview>Preview...</preview>
+    <website>Website</website>
+    <no_author_specified>No author specified</no_author_specified>
+    <get_more_templates>Get more templates from BardCanvas.com</get_more_templates>
+    
 </language>

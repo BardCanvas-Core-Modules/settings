@@ -60,4 +60,10 @@
         <name_already_exists>El nombre que has especificado ya existe.</name_already_exists>
     </add>
     
+    <select>Seleccionar</select>
+    <preview>Vista previa...</preview>
+    <website>Sitio web</website>
+    <no_author_specified>Autor no especificado</no_author_specified>
+    <get_more_templates>Descarga más plantillas de BardCanvas.com</get_more_templates>
+    
 </language>

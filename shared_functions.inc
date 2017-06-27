@@ -74,9 +74,9 @@ function render_settings_editor($type, $name, $value, $specs = null, $input_name
     
     if( $type == "template_selector" )
     {
-        $installed_templates = glob(ROOTPATH . "/templates/*", GLOB_ONLYDIR);
+        echo "<div class='template_selector'>";
         
-        echo "<select name='{$input_name}[{$name}]'>";
+        $installed_templates = glob(ROOTPATH . "/templates/*", GLOB_ONLYDIR);
         foreach($installed_templates as $template_dir)
         {
             $xml_file = "{$template_dir}/template_info.xml";
@@ -86,10 +86,70 @@ function render_settings_editor($type, $name, $value, $specs = null, $input_name
             $template_xml  = simplexml_load_file($xml_file);
             $template_name = "{$template_xml->name} {$template_xml->version}";
             
-            $selected = $template_key == $value ? "selected" : "";
-            echo "<option {$selected} value='{$template_key}'>{$template_name}</option>";
+            $select    = "$(this).closest('.template_item').find('input[type=radio]').prop('checked', true); "
+                       . "$(this).closest('.template_selector').find('.template_item').toggleClass('state_active', false); "
+                       . "$(this).closest('.template_item').toggleClass('state_active', true);";
+            $preview   = "window.open('{$config->full_root_path}/?preview_template={$template_key}')";
+            $state     = $template_key == $value ? "state_highlight" : "";
+            $checked   = $template_key == $value ? "checked"      : "";
+            $thumbnail = file_exists("{$template_dir}/screenshot.jpg")
+                       ? "{$config->full_root_path}/templates/{$template_key}/screenshot.jpg"
+                       : "{$config->full_root_path}/media/missing_image.png";
+            
+            $company = trim($template_xml->author->company);
+            $author  = trim($template_xml->author->name);
+            $website = trim($template_xml->website);
+            if( empty($company) && empty($author) && empty($website) )
+            {
+                $authorship = "{$current_module->language->no_author_specified}";
+            }
+            elseif( empty($company) && empty($author) && ! empty($website) )
+            {
+                $host       = current(explode("/", str_replace(array("http://", "https://", "www."), "", $website)));
+                $authorship = "<a href='{$website}' target='_blank'><i class='fa fa-home'></i> {$host}</a>";
+            }
+            else
+            {
+                if(       empty($company) && ! empty($author) ) $authorship = $author;
+                elseif( ! empty($company) &&   empty($author) ) $authorship = $company;
+                else $authorship = "$company / $author";
+                
+                if( ! empty($website) )
+                    $authorship .= " <a class='nowrap' href='{$website}' target='_blank'><i class='fa fa-home'></i> {$current_module->language->website}</a>";
+            }
+            if( ! empty($authorship) ) $authorship .= "<br>";
+            
+            $info_div_id = "iid" . uniqid();
+            $info_text   = unindent($template_xml->description);
+            $info_notes  = unindent($template_xml->notes);
+            if( ! empty($info_notes) ) $info_text = "<p>$info_text</p><pre>$info_notes</pre>";
+            
+            $preview_title = htmlspecialchars($template_name);
+            echo "
+                <div class='template_item framed_content {$state}' style='margin: 2px 0; white-space: nowrap'>
+                    <input type='radio' name='{$input_name}[{$name}]' {$checked} value='{$template_key}' style='display: none;'>
+                    
+                    <a class='prettyPhoto' href='{$thumbnail}' title='{$preview_title}'
+                       style=\"display: inline-block; width: 85px; height: 48px; vertical-align: top; margin-right: 15px; background: url('{$thumbnail}') center center no-repeat; background-size: contain;\">
+                    </a>
+                    <span style='display: inline-block; vertical-align: top; width: calc(100% - 100px); min-height: 48px; white-space: normal;'>
+                        <b>{$template_name}</b> <i class='pseudo_link fa fa-info-circle' onclick=\"show_discardable_dialog('#{$info_div_id}')\"></i><br>
+                        {$authorship}
+                        <span class='pseudo_link nowrap' onclick=\"{$preview}\"><i class='fa fa-search'></i> {$current_module->language->preview}</span>
+                        <span class='pseudo_link nowrap' onclick=\"{$select}\"><i class='fa fa-check'></i> {$current_module->language->select}</span>
+                    </span>
+                    <div id='{$info_div_id}' title='{$preview_title}' style='display: none;'>{$info_text}</div>
+                </div>
+            ";
         }
-        echo "</select>";
+        
+        echo "
+            <p style='margin-bottom: 0;'>
+                <a href='https://bardcanvas.com/category/templates' target='_blank'><i class='fa fa-download'></i>
+                {$current_module->language->get_more_templates}</a>
+            </p>
+        ";
+        echo "</div>";
         
         return;
     }
