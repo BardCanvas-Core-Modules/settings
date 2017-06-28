@@ -1,6 +1,10 @@
 
 # Settings Module Change Log
 
+## [1.6.0] - 2017-06-27
+
+- Refactored template selector with info and previews.
+
 ## [1.5.0] - 2017-05-13
 
 - Detached functions so they can be included on other modules to build custom settings editors.
