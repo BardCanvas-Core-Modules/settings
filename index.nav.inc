@@ -118,9 +118,7 @@ $selected_group = stripslashes($_GET["selected_group"]);
     }
     .CodeMirror-scroll { max-height: 80vh; }
     td.indented { padding-left: 18px; }
-    td.details  { width: 60%; }
-    td.control  { width: 40%; }
-
+    
     .toplinks          { margin-bottom: 10px; }
     .toplinks .toplink { margin: 0 5px 5px 0; font-family: "Arial Narrow", Arial, Arial, Helvetica, sans-serif; }
     
@@ -397,8 +395,12 @@ $selected_group = stripslashes($_GET["selected_group"]);
                     {
                         $details_class = "indented";
                         echo "
-                        <tr class='clicked'>
+                        <tr class='separator clicked'>
                             <td colspan=\"2\">
+                                <button type=\"submit\" class=\"pull-right\" onclick=\"selected_group = '" . addslashes($group_name) . "';\">
+                                    <span class=\"fa fa-save\"></span>
+                                    {$current_module->language->admin->record_nav->save_now}
+                                </button>
                                 <span class='fa fa-caret-down'></span>
                                 <b>{$key}</b>
                             </td>
