@@ -1,6 +1,10 @@
 
 # Settings Module Change Log
 
+## [1.6.1] - 2017-07-03
+
+- Improved editor responsiveness.
+
 ## [1.6.0] - 2017-06-27
 
 - Refactored template selector with info and previews.
