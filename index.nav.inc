@@ -340,6 +340,7 @@ $selected_group = stripslashes($_GET["selected_group"]);
             else                          $group_language = $modules[str_replace("modules:", "", $group_name )]->language;
             
             if( empty($group_language->settings_data) ) continue;
+            if( empty($group_language->settings_data->title) ) continue;
             
             $group_language = $group_language->settings_data;
             $group_title    = trim($group_language->title);
@@ -364,6 +365,9 @@ $selected_group = stripslashes($_GET["selected_group"]);
         /** @var \SimpleXMLElement $group_language */
         if( $group_name == "engine" ) $group_language = $language;
         else                          $group_language = $modules[str_replace("modules:", "", $group_name)]->language;
+        
+        if( empty($group_language->settings_data->title) && isset($modules[str_replace("modules:", "", $group_name)]) )
+            continue;
         
         if( $group_data->value != "___SEPARATOR___" && empty($group_language->settings_data) )
         {
