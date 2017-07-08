@@ -335,9 +335,10 @@ $selected_group = stripslashes($_GET["selected_group"]);
         $tabs = array();
         foreach($var_groups as $group_name => $group_data)
         {
-            /** @var \SimpleXMLElement $group_language */
-            if( $group_name == "engine" ) $group_language = $language;
-            else                          $group_language = $modules[str_replace("modules:", "", $group_name )]->language;
+            if( $group_name == "engine" ) continue;
+            
+                /** @var \SimpleXMLElement $group_language */
+            $group_language = $modules[str_replace("modules:", "", $group_name )]->language;
             
             if( empty($group_language->settings_data) ) continue;
             if( empty($group_language->settings_data->title) ) continue;
@@ -349,7 +350,11 @@ $selected_group = stripslashes($_GET["selected_group"]);
         }
         
         ksort($tabs);
-        foreach($tabs as $group_title => $group_name):
+        ?>
+        <span class="toplink framed_content pseudo_link" data-group-name="engine"
+              onmouseover="$(this).toggleClass('state_hover', true)" onmouseout="$(this).toggleClass('state_hover', false)"
+              onclick="show_settings_group(this)"><?= $language->settings_data->title ?></span>
+        <? foreach($tabs as $group_title => $group_name):
             $class = ""; # $group_name == $selected_group ? "state_active" : ""; ?>
             <span class="toplink framed_content <?= $class ?> pseudo_link" data-group-name="<?= wp_sanitize_filename($group_name) ?>"
                   onmouseover="$(this).toggleClass('state_hover', true)" onmouseout="$(this).toggleClass('state_hover', false)"
