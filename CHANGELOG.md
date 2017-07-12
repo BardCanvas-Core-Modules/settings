@@ -1,6 +1,11 @@
 
 # Settings Module Change Log
 
+## [1.6.2] - 2017-07-11
+
+- Tuning to avoid showing empty groups.
+- Moved engine settings tab to the front of the others in the selector.
+
 ## [1.6.1] - 2017-07-03
 
 - Improved editor responsiveness.
