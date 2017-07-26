@@ -1,6 +1,10 @@
 
 # Settings Module Change Log
 
+## [1.7.0] - 2017-07-26
+
+- Added functionality to edit template settings.
+
 ## [1.6.2] - 2017-07-11
 
 - Tuning to avoid showing empty groups.
