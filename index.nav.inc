@@ -32,6 +32,25 @@ if( $account->level >= config::ADMIN_USER_LEVEL )
     }
 }
 
+# Template settings - if the template has them!
+$template_group_key = "templates:" . $template->name;
+if( ! empty($template->language) )
+{
+    foreach($template->language->settings_data->specs as $spec)
+    {
+        if( $spec["is_separator"] )
+            $var_groups[$template_group_key][trim($spec)] = (object) array(
+                "name"  => $template_group_key . "." . trim($spec),
+                "value" => "___SEPARATOR___"
+            );
+        else
+            $var_groups[$template_group_key][trim($spec["key"])] = (object) array(
+                "name"  => $template_group_key . "." . trim($spec["key"]),
+                "value" => ""
+            );
+    }
+}
+
 $skipped_groups = array();
 if( $account->level < config::ADMIN_USER_LEVEL ) $skipped_groups[] = "engine";
 foreach($modules as $module)
@@ -80,6 +99,8 @@ while($row = $database->fetch_object($res))
     $var_key    = $matches[2];
     
     if( in_array($group_name, $skipped_groups) ) continue;
+    
+    if( substr($group_name, 0, 10) == "templates:" && $group_name != $template_group_key ) continue;
     
     if( isset($var_groups[$group_name][$var_key]) )
         $var_groups[$group_name][$var_key]->value = $row->value;
@@ -336,6 +357,7 @@ $selected_group = stripslashes($_GET["selected_group"]);
         foreach($var_groups as $group_name => $group_data)
         {
             if( $group_name == "engine" ) continue;
+            if( substr($group_name, 0, 10) == "templates:" ) continue;
             
                 /** @var \SimpleXMLElement $group_language */
             $group_language = $modules[str_replace("modules:", "", $group_name )]->language;
@@ -354,6 +376,13 @@ $selected_group = stripslashes($_GET["selected_group"]);
         <span class="toplink framed_content pseudo_link" data-group-name="engine"
               onmouseover="$(this).toggleClass('state_hover', true)" onmouseout="$(this).toggleClass('state_hover', false)"
               onclick="show_settings_group(this)"><?= $language->settings_data->title ?></span>
+        
+        <? if( ! empty($template->language) ): ?>
+            <span class="toplink framed_content pseudo_link" data-group-name="<?= wp_sanitize_filename($template_group_key) ?>"
+                  onmouseover="$(this).toggleClass('state_hover', true)" onmouseout="$(this).toggleClass('state_hover', false)"
+                  onclick="show_settings_group(this)"><?= $template->language->settings_data->title ?></span>
+        <? endif; ?>
+        
         <? foreach($tabs as $group_title => $group_name):
             $class = ""; # $group_name == $selected_group ? "state_active" : ""; ?>
             <span class="toplink framed_content <?= $class ?> pseudo_link" data-group-name="<?= wp_sanitize_filename($group_name) ?>"
@@ -368,8 +397,9 @@ $selected_group = stripslashes($_GET["selected_group"]);
         # echo "<pre>" . print_r($group_data, true) . "</pre>";
         
         /** @var \SimpleXMLElement $group_language */
-        if( $group_name == "engine" ) $group_language = $language;
-        else                          $group_language = $modules[str_replace("modules:", "", $group_name)]->language;
+        if( $group_name == "engine"              ) $group_language = $language;
+        elseif($group_name == $template_group_key) $group_language = $template->language;
+        else                                       $group_language = $modules[str_replace("modules:", "", $group_name)]->language;
         
         if( empty($group_language->settings_data->title) && isset($modules[str_replace("modules:", "", $group_name)]) )
             continue;
