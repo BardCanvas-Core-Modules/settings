@@ -1,6 +1,10 @@
 
 # Settings Module Change Log
 
+## [1.7.1] - 2017-08-02
+
+- Improved navigation tabs usage.
+
 ## [1.7.0] - 2017-07-26
 
 - Added functionality to edit template settings.
