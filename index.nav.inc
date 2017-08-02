@@ -155,7 +155,7 @@ $selected_group = stripslashes($_GET["selected_group"]);
 
 <script type="text/javascript">
     
-    var selected_group = '<?= addslashes($selected_group) ?>';
+    var selected_group = '<?= $selected_group == "*" ? $selected_group : wp_sanitize_filename($selected_group) ?>';
     
     function prepare_form_submission()
     {
@@ -204,16 +204,15 @@ $selected_group = stripslashes($_GET["selected_group"]);
             });
         });
         
-        $('#settings_form').ajaxForm({
+        var $form = $('#settings_form');
+        $form.ajaxForm({
             target:       '#settings_saving_target',
             beforeSubmit: prepare_form_submission,
             success:      process_form_response
         });
         
         if( selected_group != '' )
-        {
-            $.scrollTo(sprintf('div[data-raw-group-name="%s"]', selected_group), 500);
-        }
+            show_settings_group( $form.find('.toplink[data-group-name="' + selected_group + '"]') );
     });
     
     function filter_settings()
@@ -274,9 +273,9 @@ $selected_group = stripslashes($_GET["selected_group"]);
         var $form     = $('#settings_form');
         var $toplinks = $form.find('.toplinks');
         var $trigger  = $(trigger);
-        var group_name = $trigger.attr('data-group-name');
+        selected_group = $trigger.attr('data-group-name');
         
-        if( group_name == '*' )
+        if( selected_group == '*' )
         {
             $toplinks.find('.toplink').toggleClass('state_active', false);
             $form.find('.group_container').show();
@@ -286,8 +285,8 @@ $selected_group = stripslashes($_GET["selected_group"]);
         
         $toplinks.find('.toplink').toggleClass('state_active', false);
         $trigger.toggleClass('state_active', true);
-        $form.find('.group_container:not([data-group-name="' +  group_name + '"])').hide();
-        $form.find('.group_container[data-group-name="' +  group_name + '"]').show();
+        $form.find('.group_container:not([data-group-name="' +  selected_group + '"])').hide();
+        $form.find('.group_container[data-group-name="' +  selected_group + '"]').show();
     }
     
     function add_setting()
@@ -321,7 +320,7 @@ $selected_group = stripslashes($_GET["selected_group"]);
 
 <a name="top"></a>
 <h1 class="clearfix">
-    <button class="pull-right" onclick="location.href = '<?= $_SERVER["PHP_SELF"] ?>?wasuuup=<?= md5(mt_rand(1, 65535)) ?>'">
+    <button class="pull-right" onclick="location.href = '<?= $_SERVER["PHP_SELF"] ?>?selected_group=' + selected_group + '&wasuuup=<?= md5(mt_rand(1, 65535)) ?>'">
         <span class="fa fa-refresh"></span>
         <?= $language->reload ?>
     </button>
@@ -373,19 +372,21 @@ $selected_group = stripslashes($_GET["selected_group"]);
         
         ksort($tabs);
         ?>
-        <span class="toplink framed_content pseudo_link" data-group-name="engine"
-              onmouseover="$(this).toggleClass('state_hover', true)" onmouseout="$(this).toggleClass('state_hover', false)"
-              onclick="show_settings_group(this)"><?= $language->settings_data->title ?></span>
+        <? if( $account->level >= config::ADMIN_USER_LEVEL ): ?>
+            <span class="toplink selectable framed_content pseudo_link" data-group-name="engine"
+                  onmouseover="$(this).toggleClass('state_hover', true)" onmouseout="$(this).toggleClass('state_hover', false)"
+                  onclick="show_settings_group(this)"><?= $language->settings_data->title ?></span>
+        <? endif; ?>
         
         <? if( ! empty($template->language) ): ?>
-            <span class="toplink framed_content pseudo_link" data-group-name="<?= wp_sanitize_filename($template_group_key) ?>"
+            <span class="toplink selectable framed_content pseudo_link" data-group-name="<?= wp_sanitize_filename($template_group_key) ?>"
                   onmouseover="$(this).toggleClass('state_hover', true)" onmouseout="$(this).toggleClass('state_hover', false)"
                   onclick="show_settings_group(this)"><?= $template->language->settings_data->title ?></span>
         <? endif; ?>
         
         <? foreach($tabs as $group_title => $group_name):
             $class = ""; # $group_name == $selected_group ? "state_active" : ""; ?>
-            <span class="toplink framed_content <?= $class ?> pseudo_link" data-group-name="<?= wp_sanitize_filename($group_name) ?>"
+            <span class="toplink selectable framed_content <?= $class ?> pseudo_link" data-group-name="<?= wp_sanitize_filename($group_name) ?>"
                   onmouseover="$(this).toggleClass('state_hover', true)" onmouseout="$(this).toggleClass('state_hover', false)"
                   onclick="show_settings_group(this)"><?= $group_title ?></span>
         <? endforeach; ?>
@@ -589,7 +590,7 @@ $selected_group = stripslashes($_GET["selected_group"]);
         <? endforeach; ?>
         
         <script type="text/javascript">
-            var html = "<span class=\"toplink framed_content pseudo_link\" data-group-name=\"__orphan__\" "
+            var html = "<span class=\"toplink selectable framed_content pseudo_link\" data-group-name=\"__orphan__\" "
                 + "onmouseover=\"$(this).toggleClass('state_hover', true)\" "
                 + "onmouseout=\"$(this).toggleClass('state_hover', false)\" "
                 + "onclick=\"show_settings_group(this)\">"
