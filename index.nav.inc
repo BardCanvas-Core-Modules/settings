@@ -137,6 +137,8 @@ $selected_group = stripslashes($_GET["selected_group"]);
         font-family: 'Lucida Console', 'Courier new', Courier, monospace !important; font-size: 8pt;
         width:       40vw;
     }
+    @media all and (max-width: 700px) { .CodeMirror { width: 100%; } }
+    
     .CodeMirror-scroll { max-height: 80vh; }
     td.indented { padding-left: 18px; }
     
