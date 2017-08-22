@@ -1,6 +1,10 @@
 
 # Settings Module Change Log
 
+## [1.7.2] - 2017-08-22
+
+- Minor CSS fixes.
+
 ## [1.7.1] - 2017-08-02
 
 - Improved navigation tabs usage.
