@@ -216,7 +216,8 @@ function render_settings_editor($type, $name, $value, $specs = null, $input_name
     if( $type == "number" )
     {
         echo "
-            <input type='number' name='{$input_name}[{$name}]' value='{$value}' style='text-align: center;'
+            <input type='number' name='{$input_name}[{$name}]' value='{$value}'
+                   step='{$specs->options->step}' style='text-align: center;'
                    min='{$specs->options->min}' max='{$specs->options->max}'>
         ";
         
