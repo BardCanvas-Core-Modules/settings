@@ -73,8 +73,19 @@ foreach($modules as $module)
         continue;
     }
     
+    /** @var \SimpleXMLElement $spec */
     foreach($module->language->settings_data->specs as $spec)
     {
+        if( ! empty($spec["required_modules"]) )
+        {
+            $required_modules = explode(",", trim($spec["required_modules"]));
+            foreach($required_modules as $required_module_name)
+                if( ! $modues[$required_module_name]->enabled )
+                    $spec->addAttribute("disabled", "true");
+        }
+        
+        if( trim($spec["disabled"]) == "true" ) continue;
+        
         $key = trim($spec["key"]); if( empty($key) ) $key = trim($spec);
         $var_groups["modules:{$module->name}"][$key] = (object) array(
             "name"  => "modules:{$module->name}.{$key}",
