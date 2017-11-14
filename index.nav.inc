@@ -80,7 +80,7 @@ foreach($modules as $module)
         {
             $required_modules = explode(",", trim($spec["required_modules"]));
             foreach($required_modules as $required_module_name)
-                if( ! $modues[$required_module_name]->enabled )
+                if( ! $modules[$required_module_name]->enabled )
                     $spec->addAttribute("disabled", "true");
         }
         
