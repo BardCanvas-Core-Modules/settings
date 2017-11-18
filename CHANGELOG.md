@@ -1,6 +1,11 @@
 
 # Settings Module Change Log
 
+## [1.8.0] - 2017-11-18
+
+- Added support to hide settings that require other modules to be active.
+- Added support for decimals in "number" types.
+
 ## [1.7.2] - 2017-08-22
 
 - Minor CSS fixes.
