@@ -12,6 +12,8 @@ use hng2_base\module;
 
 include_once __DIR__ . "/shared_functions.inc";
 
+$current_module->load_extensions("specs_renderer", "prestart");
+
 $var_groups = array();
 
 # Engine settings are for strict admins

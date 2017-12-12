@@ -46,7 +46,7 @@
     -->
     
     <extension_areas_info><![CDATA[
-        Specs renderer: Preinits
+        Specs renderer: Prestart, Preinits
         Specs renderer: Image selector injection
     ]]></extension_areas_info>
     
