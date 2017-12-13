@@ -11,6 +11,7 @@ use hng2_base\config;
 use hng2_base\module;
 
 include_once __DIR__ . "/shared_functions.inc";
+include_once __DIR__ . "/local_functions.inc";
 
 $current_module->load_extensions("specs_renderer", "prestart");
 
@@ -23,13 +24,17 @@ if( $account->level >= config::ADMIN_USER_LEVEL )
     {
         if( $spec["is_separator"] )
             $var_groups["engine"][trim($spec)] = (object) array(
-                "name"  => "engine." . trim($spec),
-                "value" => "___SEPARATOR___"
+                "name"             => "engine." . trim($spec),
+                "value"            => "___SEPARATOR___",
+                "display_group"    => trim($spec["display_group"]),
+                "required_modules" => trim($spec["required_modules"]),
             );
         else
             $var_groups["engine"][trim($spec["key"])] = (object) array(
-                "name"  => "engine." . trim($spec["key"]),
-                "value" => ""
+                "name"             => "engine." . trim($spec["key"]),
+                "value"            => "",
+                "display_group"    => trim($spec["display_group"]),
+                "required_modules" => trim($spec["required_modules"]),
             );
     }
 }
@@ -42,18 +47,23 @@ if( ! empty($template->language) )
     {
         if( $spec["is_separator"] )
             $var_groups[$template_group_key][trim($spec)] = (object) array(
-                "name"  => $template_group_key . "." . trim($spec),
-                "value" => "___SEPARATOR___"
+                "name"             => $template_group_key . "." . trim($spec),
+                "value"            => "___SEPARATOR___",
+                "display_group"    => trim($spec["display_group"]),
+                "required_modules" => trim($spec["required_modules"]),
             );
         else
             $var_groups[$template_group_key][trim($spec["key"])] = (object) array(
-                "name"  => $template_group_key . "." . trim($spec["key"]),
-                "value" => ""
+                "name"             => $template_group_key . "." . trim($spec["key"]),
+                "value"            => "",
+                "display_group"    => trim($spec["display_group"]),
+                "required_modules" => trim($spec["required_modules"]),
             );
     }
 }
 
 $skipped_groups = array();
+$display_groups = array();
 if( $account->level < config::ADMIN_USER_LEVEL ) $skipped_groups[] = "engine";
 foreach($modules as $module)
 {
@@ -78,6 +88,12 @@ foreach($modules as $module)
     /** @var \SimpleXMLElement $spec */
     foreach($module->language->settings_data->specs as $spec)
     {
+        $display_group = trim($spec["display_group"]);
+        $actual_group  = $module->name . ":" . $display_group;
+        if( ! empty($display_group) )
+            if( ! in_array($actual_group, $display_groups) )
+                $display_groups[] = $actual_group;
+        
         if( ! empty($spec["required_modules"]) )
         {
             $required_modules = explode(",", trim($spec["required_modules"]));
@@ -90,8 +106,10 @@ foreach($modules as $module)
         
         $key = trim($spec["key"]); if( empty($key) ) $key = trim($spec);
         $var_groups["modules:{$module->name}"][$key] = (object) array(
-            "name"  => "modules:{$module->name}.{$key}",
-            "value" => $spec["is_separator"] ? "___SEPARATOR___" : ""
+            "name"             => "modules:{$module->name}.{$key}",
+            "value"            => $spec["is_separator"] ? "___SEPARATOR___" : "",
+            "display_group"    => trim($spec["display_group"]),
+            "required_modules" => trim($spec["required_modules"]),
         );
     }
 }
@@ -168,6 +186,9 @@ $selected_group = stripslashes($_GET["selected_group"]);
 <!-- Hilitor -->
 <script type="text/javascript" src="<?= $config->full_root_path ?>/lib/jquery.highlight-5.js"></script>
 
+<!-- Pseudo dialog -->
+<link rel="stylesheet" href="<?= $config->full_root_path ?>/media/pseudo_dialog.css">
+
 <script type="text/javascript">
     
     var selected_group = '<?= $selected_group == "*" ? $selected_group : wp_sanitize_filename($selected_group) ?>';
@@ -200,23 +221,27 @@ $selected_group = stripslashes($_GET["selected_group"]);
         {
             var element = $(this).get(0);
             
-            CodeMirror.fromTextArea(element, {
+            var editor = CodeMirror.fromTextArea(element, {
                 // viewPortMargin: Infinity,
                 lineNumbers:    true,
                 mode:           'htmlmixed'
-            }); 
+            });
+            
+            $(this).data('editor', editor);
         });
         
         $('textarea.CodeMirror.wrapped').each(function()
         {
             var element = $(this).get(0);
             
-            CodeMirror.fromTextArea(element, {
+            var editor = CodeMirror.fromTextArea(element, {
                 // viewPortMargin: Infinity,
                 lineNumbers:    true,
                 lineWrapping:   true,
                 mode:           'htmlmixed'
             });
+            
+            $(this).data('editor', editor);
         });
         
         var $form = $('#settings_form');
@@ -329,6 +354,27 @@ $selected_group = stripslashes($_GET["selected_group"]);
             location.href = $_FULL_ROOT_PATH + sprintf('/settings/?wasuuup=%s#orphan', wasuuup());
         });
     }
+    
+    function open_settings_display_group(module, key, title)
+    {
+        if( typeof title === 'undefined' ) title = '';
+        
+        var sel = sprintf('#dg-%s-%s', module, key);
+        $(sel).find('.title .caption').text(title);
+        
+        $('body').css('overflow', 'hidden');
+        $(sel).fadeIn('fast', function()
+        {
+            $(sel).find('textarea.CodeMirror').each(function() { $(this).data('editor').refresh(); });
+        });
+    }
+    
+    function close_settings_display_group(module, key)
+    {
+        var sel = sprintf('#dg-%s-%s', module, key);
+        $(sel).fadeOut('fast');
+        $('body').css('overflow', 'auto');
+    }
 </script>
 
 <div id="add_prompt" style="display: none;"><?= unindent($current_module->language->add->prompt) ?></div>
@@ -366,45 +412,8 @@ $selected_group = stripslashes($_GET["selected_group"]);
               onmouseover="$(this).toggleClass('state_hover', true)" onmouseout="$(this).toggleClass('state_hover', false)"
               onclick="show_settings_group(this)"><?= $current_module->language->admin->record_nav->show_all ?></span>
         
-        <?
-        $tabs = array();
-        foreach($var_groups as $group_name => $group_data)
-        {
-            if( $group_name == "engine" ) continue;
-            if( substr($group_name, 0, 10) == "templates:" ) continue;
-            
-                /** @var \SimpleXMLElement $group_language */
-            $group_language = $modules[str_replace("modules:", "", $group_name )]->language;
-            
-            if( empty($group_language->settings_data) ) continue;
-            if( empty($group_language->settings_data->title) ) continue;
-            
-            $group_language = $group_language->settings_data;
-            $group_title    = trim($group_language->title);
-            
-            $tabs[$group_title] = $group_name;
-        }
+        <? render_settings_tabs(); ?>
         
-        ksort($tabs);
-        ?>
-        <? if( $account->level >= config::ADMIN_USER_LEVEL ): ?>
-            <span class="toplink selectable framed_content pseudo_link" data-group-name="engine"
-                  onmouseover="$(this).toggleClass('state_hover', true)" onmouseout="$(this).toggleClass('state_hover', false)"
-                  onclick="show_settings_group(this)"><?= $language->settings_data->title ?></span>
-        <? endif; ?>
-        
-        <? if( ! empty($template->language) ): ?>
-            <span class="toplink selectable framed_content pseudo_link" data-group-name="<?= wp_sanitize_filename($template_group_key) ?>"
-                  onmouseover="$(this).toggleClass('state_hover', true)" onmouseout="$(this).toggleClass('state_hover', false)"
-                  onclick="show_settings_group(this)"><?= $template->language->settings_data->title ?></span>
-        <? endif; ?>
-        
-        <? foreach($tabs as $group_title => $group_name):
-            $class = ""; # $group_name == $selected_group ? "state_active" : ""; ?>
-            <span class="toplink selectable framed_content <?= $class ?> pseudo_link" data-group-name="<?= wp_sanitize_filename($group_name) ?>"
-                  onmouseover="$(this).toggleClass('state_hover', true)" onmouseout="$(this).toggleClass('state_hover', false)"
-                  onclick="show_settings_group(this)"><?= $group_title ?></span>
-        <? endforeach; ?>
     </div>
     
     <?
@@ -420,7 +429,7 @@ $selected_group = stripslashes($_GET["selected_group"]);
         if( empty($group_language->settings_data->title) && isset($modules[str_replace("modules:", "", $group_name)]) )
             continue;
         
-        if( $group_data->value != "___SEPARATOR___" && empty($group_language->settings_data) )
+        if( empty($group_language->settings_data) )
         {
             $undefined_vars[$group_name] = $group_data;
             
@@ -444,84 +453,9 @@ $selected_group = stripslashes($_GET["selected_group"]);
                 </thead>
                 
                 <tbody>
-                <? foreach($group_data as $key => $data):
-                    
-                    if( $data->value == "___SEPARATOR___" )
-                    {
-                        $details_class = "indented";
-                        echo "
-                        <tr class='separator clicked'>
-                            <td colspan=\"2\">
-                                <button type=\"submit\" class=\"pull-right\" onclick=\"selected_group = '" . addslashes($group_name) . "';\">
-                                    <span class=\"fa fa-save\"></span>
-                                    {$current_module->language->admin->record_nav->save_now}
-                                </button>
-                                <span class='fa fa-caret-down'></span>
-                                <b>{$key}</b>
-                            </td>
-                        </tr>
-                        ";
-                        
-                        continue;
-                    }
-                    
-                    /** @var \SimpleXMLElement $specs */
-                    $specs = current($group_language->xpath("//specs[@key='$key']"));
-                    
-                    if( empty($specs) )
-                    {
-                        $undefined_vars[$group_name][$key] = $data;
-                        
-                        continue;
-                    }
-                    
-                    if($specs["disabled"] == "true") continue;
-                    
-                    $class = "";
-                    if($specs["is_locked"] == "true") $class .= " disabled";
-                    if($specs["highlight_class"])     $class .= " {$specs["highlight_class"]}";
-                    ?>
-                    <tr class="searchable <?= $class ?>">
-                        <td class="details searchable_target <?= $details_class ?>">
-                            <div class="principal_data">
-                                <? if($specs["is_locked"] == "true") echo "<span class='fa fa-lock'></span>" ?>
-                                <?= $specs->title ?>
-                                <span class="framed_content inlined fixed_font" style="font-weight: normal;"><?= $data->name ?></span>
-                            </div>
-                            <? if( isset($specs->options->check_if_php_function_exists) ):
-                                $exists  = function_exists(trim($specs->options->check_if_php_function_exists->function_name));
-                                $class   = $exists ? "state_active" : "state_ko";
-                                $caption = $exists ? $specs->options->check_if_php_function_exists->if_exists
-                                         : $specs->options->check_if_php_function_exists->if_not_exists;
-                                $icon    = $exists ? "fa-check" : "fa-times"; ?>
-                                <blockquote>
-                                    <div class="framed_content <?= $class ?>">
-                                        <i class="fa <?= $icon ?>"></i>
-                                        <?= $caption ?>
-                                    </div>
-                                </blockquote>
-                            <? endif; ?>
-                            <blockquote>
-                                <?= replace_escaped_vars(
-                                    $specs->description,
-                                    array('{$full_root_url}'),
-                                    array($config->full_root_url)
-                                ) ?>
-                            </blockquote>
-                            <!--<span class="framed_content inlined"><?= $data->name ?></span>-->
-                        </td>
-                        <td class="control">
-                            <?
-                            if($specs["is_locked"] != "true")
-                                render_settings_editor($specs->type, $data->name, $data->value, $specs);
-                            else
-                                echo "<div class='framed_content disabled'>" 
-                                    . ($data->value == "" ? "&mdash;" : nl2br($data->value)) 
-                                    . "</div>";
-                            ?>
-                        </td>
-                    </tr>
-                <? endforeach; ?>
+                <?
+                foreach($group_data as $key => $data) render_settings_group($key, $data);
+                ?>
                 </tbody>
             </table>
             
@@ -615,5 +549,60 @@ $selected_group = stripslashes($_GET["selected_group"]);
         </script>
         
     <? endif; ?>
+    
+    <?
+    if( ! empty($display_groups) ):
+        foreach($display_groups as $display_group):
+            list($module_name, $group_key) = explode(":", $display_group);
+            ?>
+            <div class="pseudo_dialog" id="<?= "dg-{$module_name}-{$group_key}" ?>">
+                <div class="frame" style="max-width: calc(100vw - 10px)">
+                    <div class="title ui-widget-header">
+                        <i class="fa fa-times fa-lg fa-border pull-right"
+                           style="cursor: pointer; margin-top: 5px; margin-right: 5px;"
+                           onclick="close_settings_display_group('<?= $module_name ?>', '<?= $group_key ?>')"></i>
+                        <span class="caption"></span>
+                    </div>
+                    <div class="content" style="max-height: calc(100vh - 65px)">
+                        
+                        <?
+                        foreach($var_groups as $group_name => $group_data):
+                            
+                            /** @var \SimpleXMLElement $group_language */
+                            if( $group_name == "engine"              ) $group_language = $language;
+                            elseif($group_name == $template_group_key) $group_language = $template->language;
+                            else                                       $group_language = $modules[str_replace("modules:", "", $group_name)]->language;
+                            
+                            if( empty($group_language->settings_data->title) && isset($modules[str_replace("modules:", "", $group_name)]) )
+                                continue;
+                            
+                            if( empty($group_language->settings_data) )
+                                continue;
+                            
+                            $group_language = $group_language->settings_data;
+                            $details_class = "";
+                            $group_style   = ""; # ($selected_group != "" && $group_name != $selected_group) ? "display: none;" : "";
+                            ?>
+                            
+                            <table class="settings_group nav_table no_highlight">
+                                <tbody>
+                                <?
+                                foreach($group_data as $key => $data)
+                                {
+                                    render_settings_group($key, $data, "modules:$module_name", $group_key, false, false);
+                                }
+                                ?>
+                                </tbody>
+                            </table>
+                            
+                        <? endforeach; ?>
+                        
+                    </div>
+                </div>
+            </div>
+            <?
+        endforeach;
+    endif;
+    ?>
     
 </form>
