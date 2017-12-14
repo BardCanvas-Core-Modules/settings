@@ -1,6 +1,12 @@
 
 # Settings Module Change Log
 
+## [1.9.0] - 2017-14-12
+
+- Added editor extension point.
+- Added display groups functionality.
+- Some code optimizations.
+
 ## [1.8.0] - 2017-11-18
 
 - Added support to hide settings that require other modules to be active.
