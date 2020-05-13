@@ -46,19 +46,38 @@ if( ! empty($template->language) )
     foreach($template->language->settings_data->specs as $spec)
     {
         if( $spec["is_separator"] )
+        {
             $var_groups[$template_group_key][trim($spec)] = (object) array(
                 "name"             => $template_group_key . "." . trim($spec),
                 "value"            => "___SEPARATOR___",
                 "display_group"    => trim($spec["display_group"]),
                 "required_modules" => trim($spec["required_modules"]),
             );
-        else
-            $var_groups[$template_group_key][trim($spec["key"])] = (object) array(
-                "name"             => $template_group_key . "." . trim($spec["key"]),
-                "value"            => "",
-                "display_group"    => trim($spec["display_group"]),
-                "required_modules" => trim($spec["required_modules"]),
-            );
+            
+            continue;
+        }
+        
+        $include_setting      = true;
+        $raw_required_modules = trim($spec["required_modules"]);
+        if( ! empty($raw_required_modules) )
+        {
+            $required_modules = explode(",", $raw_required_modules);
+            foreach($required_modules as $required_module_name)
+            {
+                if( ! $modules[$required_module_name]->enabled )
+                {
+                    $include_setting = false;
+                    break;
+                }
+            }
+        }
+        
+        if( $include_setting ) $var_groups[$template_group_key][trim($spec["key"])] = (object) array(
+            "name"             => $template_group_key . "." . trim($spec["key"]),
+            "value"            => "",
+            "display_group"    => trim($spec["display_group"]),
+            "required_modules" => $raw_required_modules,
+        );
     }
 }
 
