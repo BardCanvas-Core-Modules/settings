@@ -1,6 +1,10 @@
 
 # Settings Module Change Log
 
+## [1.9.1] - 2020-05-13
+
+- Added module requirements check to template settings.
+
 ## [1.9.0] - 2017-14-12
 
 - Added editor extension point.
