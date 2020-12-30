@@ -34,6 +34,10 @@ function render_settings_editor($type, $name, $value, $specs = null, $input_name
         if( empty($value) ) $value = $default;
         
         echo "<select name='{$input_name}[{$name}]'>";
+        
+        $selected = $value == 0 ? "selected" : "";
+        echo "<option {$selected} value='0'>0 - {$current_module->language->special_user_levels->everyone}</option>";
+        
         foreach($config->user_levels_by_level as $level => $title)
         {
             if( $level <= 1 ) continue;
@@ -41,6 +45,10 @@ function render_settings_editor($type, $name, $value, $specs = null, $input_name
             $selected = $level == $value ? "selected" : "";
             echo "<option {$selected} value='{$level}'>{$level} - {$title}</option>";
         }
+        
+        $selected = $value == 256 ? "selected" : "";
+        echo "<option {$selected} value='256'>256 - {$current_module->language->special_user_levels->nobody}</option>";
+        
         echo "</select>";
         
         return;

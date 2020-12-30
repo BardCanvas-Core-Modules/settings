@@ -44,6 +44,11 @@
         ]]></missing_extender>
     </admin>
     
+    <special_user_levels>
+        <everyone>Everyone</everyone>
+        <nobody>Nobody</nobody>
+    </special_user_levels>
+    
     <add>
         <caption>Add custom...</caption>
         <prompt><![CDATA[
