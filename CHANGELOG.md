@@ -1,6 +1,10 @@
 
 # Settings Module Change Log
 
+## [1.9.2] - 2021-01-14
+
+- Added options to the user level selector.
+
 ## [1.9.1] - 2020-05-13
 
 - Added module requirements check to template settings.
