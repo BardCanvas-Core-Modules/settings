@@ -44,6 +44,29 @@
             Marcador de anclaje: <span class="framed_content inlined">{$marker}</span><br>
             Es posible que necesites instalar/activar el módulo referenciado para editar el valor de forma adecuada.
         ]]></missing_extender>
+        <bump_all_caches>
+            <button>Regenerar cachés...</button>
+            <title>Regenerar cachés</title>
+            <info><![CDATA[
+                
+                Este proceso actualizará la versión de los cachés de<br>
+                memoria y disco en todo el sitio web.<br><br>
+                
+                Advertencia: este proceso se ejecuta de inmediato,<br>
+                pero el sitio web puede experimentar un pequeño lag<br>
+                debido a que todos los cachés deberán reconstruírse.<br><br>
+                
+                Es recomendable el realizar este proces en un momento<br>
+                de bajo tráfico en el sitio web.<br><br>
+                
+                ¿Deseas ejecutarlo ahora?
+            ]]></info>
+            <done><![CDATA[
+                Actualización terminada.<br>
+                Versión de caché de disco actualizada a <b>%s</b>.<br>
+                Versión de caché de memoria actualizada a <b>%s</b>.<br>
+            ]]></done>
+        </bump_all_caches>
     </admin>
     
     <special_user_levels>

@@ -417,6 +417,11 @@ $selected_group = stripslashes($_GET["selected_group"]);
                onkeyup="filter_settings()" onchange="filter_settings()">
         <img class="cleanup" onclick="clear_settings_filter()" src="<?= $config->full_root_path ?>/media/backspace.png">
     </span>
+    
+    <button onclick="show_discardable_dialog('#bump_all_caches_dialog')">
+        <i class="fa fa-gear"></i>
+        <?= $current_module->language->admin->bump_all_caches->button ?>
+    </button>
 </h1>
 
 <div id="settings_saving_target" style="display: none;"></div>
@@ -625,3 +630,39 @@ $selected_group = stripslashes($_GET["selected_group"]);
     ?>
     
 </form>
+
+<div id="bump_all_caches_dialog" style="display: none" title="<?= $current_module->language->admin->bump_all_caches->title ?>">
+    
+    <p>
+        <?= $current_module->language->admin->bump_all_caches->info ?>
+    </p>
+    
+    <p align="center">
+        <button onclick="bump_all_caches()">
+            <i class="fa fa-check"></i>
+            <?= $language->ok ?>
+        </button>
+    </p>
+    
+</div>
+
+<script type="text/javascript">
+    function bump_all_caches()
+    {
+        stop_notifications_getter();
+        $.blockUI(blockUI_default_params);
+        var url = $_FULL_ROOT_PATH + '/settings/bump_caches.php?wasuuup=' + wasuuup();
+        $.get(url, function(response)
+        {
+            if( response !== 'OK' )
+            {
+                $.unblockUI();
+                throw_notification(response);
+                
+                return;
+            }
+            
+            setTimeout(function() { location.reload(); }, 1000)
+        });
+    }
+</script>

@@ -42,6 +42,29 @@
             Hook marker: <span class="framed_content inlined">{$marker}</span><br>
             You may need to install/enable that module to natively edit this value.
         ]]></missing_extender>
+        <bump_all_caches>
+            <button>Bump caches...</button>
+            <title>Bump caches</title>
+            <info><![CDATA[
+                
+                This process will bump the version number on the website's<br>
+                memory and disk caches.<br><br>
+                
+                Warning: this process takes place immediately,<br>
+                but the entire website might experience small lag<br>
+                since all caches will have to be rebuilt on call.<br><br>
+                
+                It is recommended to bump all caches on a time<br>
+                with low traffic.<br><br>
+                
+                Do you want to do it now?
+            ]]></info>
+            <done><![CDATA[
+                Bumping done.<br>
+                Disk cache version updated to <b>%s</b>.<br>
+                Memory cache version updated to <b>%s</b>.<br>
+            ]]></done>
+        </bump_all_caches>
     </admin>
     
     <special_user_levels>
