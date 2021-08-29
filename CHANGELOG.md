@@ -1,6 +1,10 @@
 
 # Settings Module Change Log
 
+## [1.9.3] - 2021-08-29
+
+- Added tool to bump disk/memory caches.
+
 ## [1.9.2] - 2021-01-14
 
 - Added options to the user level selector.
