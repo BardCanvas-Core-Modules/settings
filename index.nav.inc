@@ -179,6 +179,7 @@ $selected_group = stripslashes($_GET["selected_group"]);
 <script                 src="<?=$config->full_root_path?>/lib/CodeMirror-5.16.2/mode/javascript/javascript.js"></script>
 <script                 src="<?=$config->full_root_path?>/lib/CodeMirror-5.16.2/mode/css/css.js"></script>
 <script                 src="<?=$config->full_root_path?>/lib/CodeMirror-5.16.2/mode/htmlmixed/htmlmixed.js"></script>
+<script                 src="<?=$config->full_root_path?>/lib/CodeMirror-5.16.2/mode/properties/properties.js"></script>
 <link rel="stylesheet" href="<?=$config->full_root_path?>/lib/CodeMirror-5.16.2/lib/codemirror.css">
 <style type="text/css">
     .CodeMirror {
@@ -238,12 +239,15 @@ $selected_group = stripslashes($_GET["selected_group"]);
     {
         $('textarea.CodeMirror:not(.wrapped)').each(function()
         {
+            var mode = $(this).attr('data-mode');
+            if( typeof mode === 'undefined' ) mode = "htmlmixed";
+            
             var element = $(this).get(0);
             
             var editor = CodeMirror.fromTextArea(element, {
                 // viewPortMargin: Infinity,
                 lineNumbers:    true,
-                mode:           'htmlmixed'
+                mode:           mode
             });
             
             $(this).data('editor', editor);
@@ -251,13 +255,16 @@ $selected_group = stripslashes($_GET["selected_group"]);
         
         $('textarea.CodeMirror.wrapped').each(function()
         {
+            var mode = $(this).attr('data-mode');
+            if( typeof mode === 'undefined' ) mode = "htmlmixed";
+            
             var element = $(this).get(0);
             
             var editor = CodeMirror.fromTextArea(element, {
                 // viewPortMargin: Infinity,
                 lineNumbers:    true,
                 lineWrapping:   true,
-                mode:           'htmlmixed'
+                mode:           mode
             });
             
             $(this).data('editor', editor);

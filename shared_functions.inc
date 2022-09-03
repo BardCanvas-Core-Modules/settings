@@ -241,6 +241,15 @@ function render_settings_editor($type, $name, $value, $specs = null, $input_name
         return;
     }
     
+    if( $type == "ini" )
+    {
+        echo "
+            <textarea class='CodeMirror' data-mode='properties' id='ta_$generation_index' name='{$input_name}[{$name}]'>" . htmlspecialchars($value) . "</textarea>
+        ";
+        
+        return;
+    }
+    
     if( $type == "button" )
     {
         # Note: the "onclick" option must include a "return false" statement or the form will be submitted!
