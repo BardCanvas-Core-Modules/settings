@@ -1,6 +1,10 @@
 
 # Settings Module Change Log
 
+## [1.9.4] - 2022-09-11
+
+- Added support for `ini` code areas.
+
 ## [1.9.3] - 2021-08-29
 
 - Added tool to bump disk/memory caches.
