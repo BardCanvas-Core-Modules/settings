@@ -1,6 +1,10 @@
 
 # Settings Module Change Log
 
+## [1.9.5] - 2022-09-28
+
+- Removed session keys from memcache on version bumping.
+
 ## [1.9.4] - 2022-09-11
 
 - Added support for `ini` code areas.
