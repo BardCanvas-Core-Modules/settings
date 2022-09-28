@@ -16,6 +16,9 @@ if( $account->level < config::COADMIN_USER_LEVEL ) throw_fake_404();
 
 try
 {
+    $mem_cache->purge_by_prefix("@!ust_");
+    $mem_cache->purge_by_prefix("@!uot_");
+    $mem_cache->purge_by_prefix("@!udi_");
     $config->bump_disk_cache();
     $config->bump_mem_cache();
 }
